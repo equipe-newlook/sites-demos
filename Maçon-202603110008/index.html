@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Maçon Tremblay - Expert en Maçonnerie</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .hero-bg {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+        }
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+        .card-hover:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 25px 50px rgba(0,0,0,0.3);
+        }
+        .gradient-text {
+            background: linear-gradient(135deg, #f97316, #ef4444);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .btn-glow {
+            box-shadow: 0 0 20px rgba(249, 115, 22, 0.5);
+            transition: all 0.3s ease;
+        }
+        .btn-glow:hover {
+            box-shadow: 0 0 40px rgba(249, 115, 22, 0.8);
+            transform: translateY(-2px);
+        }
+        .section-divider {
+            background: linear-gradient(90deg, transparent, #f97316, transparent);
+            height: 2px;
+        }
+        .animate-pulse-slow {
+            animation: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .fade-in {
+            animation: fadeInUp 0.8s ease forwards;
+        }
+        .parallax-overlay {
+            background: linear-gradient(180deg, rgba(15,52,96,0.9) 0%, rgba(22,33,62,0.95) 100%);
+        }
+    </style>
+</head>
+<body class="bg-gray-950 text-white overflow-x-hidden">
+
+    <!-- Navigation -->
+    <nav class="fixed top-0 left-0 right-0 z-50 bg-gray-950/80 backdrop-blur-xl border-b border-gray-800/50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-20">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-gradient-to-br from-orange-500 to-red-600 rounded-xl flex items-center justify-center">
+                        <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 14l-5-5 1.41-1.41L12 14.17l7.59-7.59L21 8l-9 9z"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <span class="text-xl font-800 font-bold text-white">Maçon</span>
+                        <span class="text-xs text-orange-400 block leading-none">Tremblay</span>
+                    </div>
+                </div>
+                <div class="hidden md:flex items-center space-x-8">
+                    <a href="#accueil" class="text-gray-300 hover:text-orange-400 transition-colors duration-200 text-sm font-medium">Accueil</a>
+                    <a href="#services" class="text-gray-300 hover:text-orange-400 transition-colors duration-200 text-sm font-medium">Services</a>
+                    <a href="#apropos" class="text-gray-300 hover:text-orange-400 transition-colors duration-200 text-sm font-medium">À propos</a>
+                    <a href="#contact" class="bg-gradient-to-r from-orange-500 to-red-600 text-white px-6 py-2.5 rounded-full text-sm font-semibold btn-glow">
+                        Contact
+                    </a>
+                </div>
+                <button class="md:hidden text-gray-300" onclick="document.getElementById('mobile-menu').classList.toggle('hidden')">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <div id="mobile-menu" class="hidden md:hidden bg-gray-900 border-t border-gray-800">
+            <div class="px-4 py-4 space-y-3">
+                <a href="#accueil" class="block text-gray-300 hover:text-orange-400 py-2">Accueil</a>
+                <a href="#services" class="block text-gray-300 hover:text-orange-400 py-2">Services</a>
+                <a href="#apropos" class="block text-gray-300 hover:text-orange-400 py-2">À propos</a>
+                <a href="#contact" class="block text-orange-400 font-semibold py-2">Contact</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section id="accueil" class="min-h-screen hero-bg relative flex items-center justify-center overflow-hidden">
+        <!-- Animated background elements -->
+        <div class="absolute inset-0 overflow-hidden">
+            <div class="absolute -top-40 -right-40 w-96 h-96 bg-orange-500/10 rounded-full blur-3xl animate-pulse-slow"></div>
+            <div class="absolute -bottom-40 -left-40 w-96 h-96 bg-blue-600/10 rounded-full blur-3xl animate-pulse-slow" style="animation-delay: 1.5s;"></div>
+            <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-orange-600/5 rounded-full blur-3xl"></div>
+        </div>
+
+        <!-- Grid pattern -->
+        <div class="absolute inset-0 opacity-5" style="background-image: linear-gradient(rgba(255,255,255,.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.1) 1px, transparent 1px); background-size: 50px 50px;"></div>
+
+        <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center py-32 pt-40">
+            <div class="fade-in">
+                <div class="inline-flex items-center space-x-2 bg-orange-500/10 border border-orange-500/30 rounded-full px-4 py-2 mb-8">
+                    <div class="w-2 h-2 bg-orange-400 rounded-full animate-pulse"></div>
+                    <span class="text-orange-400 text-sm font-medium">Expert Maçonnerie · Tremblay</span>
+                </div>
+
+                <h1 class="text-5xl sm:text-6xl lg:text-8xl font-black mb-6 leading-tight">
+                    <span class="text-white">L'Art de</span><br>
+                    <span class="gradient-text">Bâtir</span>
+                    <span class="text-white"> Ensemble</span>
+                </h1>
+
+                <p class="text-gray-400 text-xl sm:text-2xl max-w-3xl mx-auto mb-12 leading-relaxed">
+                    Votre spécialiste en maçonnerie à <strong class="text-orange-400">Tremblay</strong>. 
+                    Constructions, rénovations et restaurations réalisées avec passion et savoir-faire.
+                </p>
+
+                <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+                    <a href="#contact" class="bg-gradient-to-r from-orange-500 to-red-600 text-white px-10 py-4 rounded-full text-lg font-bold btn-glow w-full sm:w-auto text-center">
+                        Demander un devis gratuit
+                    </a>
+                    <a href="#services" class="border border-gray-700 text-gray-300 hover:border-orange-500 hover:text-orange-400 px-10 py-4 rounded-full text-lg font-medium transition-all duration-300 w-full sm:w-auto text-center">
+                        Nos services
+                    </a>
+                </div>
+
+                <!-- Stats -->
+                <div class="mt-20 grid grid-cols-3 gap-8 max-w-2xl mx-auto">
+                    <div class="text-center">
+                        <div class="text-4xl font-black gradient-text">15+</div>
+                        <div class="text-gray-500 text-sm mt-1">Années d'expérience</div>
+                    </div>
+                    <div class="text-center border-x border-gray-800">
+                        <div class="text-4xl font-black gradient-text">500+</div>
+                        <div class="text-gray-500 text-sm mt-1">Projets réalisés</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-4xl font-black gradient-text">100%</div>
+                        <div class="text-gray-500 text-sm mt-1">Clients satisfaits</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Scroll indicator -->
+        <div class="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center space-y-2 animate-bounce">
+            <span class="text-gray-500 text-xs">Découvrir</span>
+            <svg class="w-5 h-5 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+            </svg>
+        </div>
+    </section>
+
+    <!-- Divider -->
+    <div class="section-divider"></div>
+
+    <!-- Services Section -->
+    <section id="services" class="py-32 bg-gray-950 relative">
+        <div class="absolute inset-0 overflow-hidden">
+            <div class="absolute top-20 right-20 w-64 h-64 bg-orange-500/5 rounded-full blur-3xl"></div>
+        </div>
+
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+            <!-- Section header -->
+            <div class="text-center mb-20">
+                <span class="text-orange-400 text-sm font-semibold uppercase tracking-widest">Ce que nous faisons</span>
+                <h2 class="text-4xl sm:text-5xl lg:text-6xl font-black text-white mt-4 mb-6">
+                    Nos <span class="gradient-text">Services</span>
+                </h2>
+                <p class="text-gray-400 text-lg max-w-2xl mx-auto">
+                    De la construction neuve à la restauration du patrimoine, nous couvrons tous vos besoins en maçonnerie avec excellence.
+                </p>
+            </div>
+
+            <!-- Services Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+                <!-- Service 1 -->
+                <div class="card-hover bg-gray-900/80 border border-gray-800 rounded-2xl p-8 group">
+                    <div class="w-14 h-14 bg-gradient-to-br from-orange-500/20 to-red-600/20 border border-orange-500/30 rounded-xl flex items-center justify-center mb-6 group-hover:from-orange-500 group-hover:to-red-600 transition-all duration-300">
+                        <svg class="w-7 h-7 text-orange-400 group-hover:text-white transition-colors duration-300" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-bold text-white mb-3">Construction Neuve</h3>
+                    <p class="text-gray-400 leading-relaxed mb-4">Réalisation de fondations, murs porteurs, dalles et structures en béton pour vos projets de construction neuve.</p>
+                    <div class="flex flex-wrap gap-2">
+                        <span class="bg-orange-500/10 text-orange-400 text-xs px-3 py-1 rounded-full">Fondations</span>
+                        <span class="bg-orange-500/10 text-orange-400 text-xs px-3 py-1 rounded-full">Murs porteurs</span>
+                        <span class="bg-orange-500/10 text-orange-400 text-xs px-3 py-1 rounded-full">Dalles</span>
+                    </div>
+                </div>
+
+                <!-- Service 2 -->
+                <div class="card-hover bg-gray-900/80 border border-gray-800 rounded-2xl p-8 group">
+                    <div class="w-14 h-14 bg-gradient-to-br from-orange-500/20 to-red-600/20 border border-orange-500/30 rounded-xl flex items-center justify-center mb-6 group-hover:from-orange-500 group-hover:to-red-600 transition-all duration-300">
+                        <svg class="w-7 h-7 text-orange-400 group-hover:text-white transition-colors duration-300" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-bold text-white mb-3">Rénovation & Restauration</h3>
+                    <p class="text-gray-400 leading-relaxed mb-4">Remise en état de structures existantes, réparation de fissures, restauration de facades et murs anciens.</p>
+                    <div class="flex flex-wrap gap-2">
+                        <span class="bg-orange-500/10 text-orange-400 text-xs px-3 py-1 rounded-full">Réparations</span>
+                        <span class="bg-orange-500/10 text-orange-400 text-xs px-3 py-1 rounded-full">Façades</span>
+                        <span class="bg-orange-500/10 text-orange-400 text-xs px-3 py-1 rounded-full">Restauration</span>
+                    </div>
+                </div>
+
+                <!-- Service 3 -->
+                <div class="card-hover bg-gray-900/80 border border-gray-800 rounded-2xl p-8 group">
+                    <div class="w-14 h-14 bg-gradient-to-br from-orange-500/20 to-red-600/20 border border-orange-500/30 rounded-xl flex items-center justify-center mb-6 group-hover:from-orange-500 group-hover:to-red-600 transition-all duration-300">
+                        <svg class="w-7 h-7 text-orange-400 group-hover:text-white transition-colors duration-300" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-bold text-white mb-3">Dallage & Carrelage</h3>
+                    <p class="text-gray-400 leading-relaxed mb-4">Pose de dallages extérieurs, terrasses, allées et revêtements de sol pour un rendu esthétique et durable.</p>
+                    <div class="flex flex-wrap gap-2">
+                        <span class="bg-orange-500/10 text-orange-400 text-xs px-3 py-1 rounded-full">Terrasses</span>
+                        <span class="bg-orange-500/10 text-orange-400 text-xs px-3 py-1 rounded-full">Allées</span>
+                        <span class="bg-orange-500/10 text-orange-400 text-xs px-3 py-1 rounded-full">Dallage</span>
+                    </div>
+                </div>
+
+                <!-- Service 4 -->
+                <div class="card-hover bg-gray-900/80 border border-gray-800 rounded-2xl p-8 group">
+                    <div class="w-14 h-14 bg-gradient-to-br from-orange-500/20 to-red-600/20 border border-orange-500/30 rounded-xl flex items-center justify-center mb-6 group-hover:from-orange-500 group-hover:to-red-600 transition-all duration-300">
+                        <svg class="w-7 h-7 text-orange-400 group-hover:text-white transition-colors duration-300" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-bold text-white mb-3">Murs & Clôtures</h3>
+                    <p class="text-gray-400 leading-relaxed mb-4">Construction de murs de soutènement, clôtures en pierre ou béton, murets de jardin et délimitations.</p>
+                    <div class="flex flex-wrap gap-2">
+                        <span class="bg-orange-500/10 text-orange-400 text-xs px-3 py-1 rounded-full">Soutènement</span>
+                        <span class="bg-orange-500/10 text-orange-400 text-xs px-3 py-1 rounded-full">Clôtures</span>
+                        <span class="bg-orange-500/10 text-orange-400 text-xs px-3 py-1 rounded-full">Murets</span>
+                    </div>
+                </div>
+
+                <!-- Service 5 -->
+                <div class="card-hover bg-gray-900/80 border border-gray-800 rounded-2xl p-8 group">
+                    <div class="w-14 h-14 bg-gradient-to-br from-orange-500/20 to-red-600/20 border border-orange-500/30 rounded-xl flex items-center justify-center mb-6 group-hover:from-orange-500 group-hover:to-red-600 transition-all duration-300">
+                        <svg class="w-7 h-7 text-orange-400 group-hover:text-white transition-colors duration-300" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M13.5 5.5c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zM9.8 8.9L7 23h2.1l1.8-8 2.1 2v6h2v-7.5l-2.1-2 .6-3C14.8 12 16.8 13 19 13v-2c-1.9 0-3.5-1-4.3-2.4l-1-1.6c-.4-.6-1-1-1.7-1-.3 0-.5.1-.8.1L6 8.3V13h2V9.6l1.8-.7"/>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-bold text-white mb-3">Enduits & Crépis</h3>
+                    <p class="text-gray-400 leading-relaxed mb-4">Application d'enduits intérieurs et extérieurs, crépis décoratifs, ragréage et finitions soignées de haute qualité.</p>
+                    <div class="flex flex-wrap gap-2">
+                        <span class="bg-orange-500/10 text-orange-400 text-xs px-3 py-1 rounded-full">Enduits</span>
+                        <span class="bg-orange-500/10 text-orange-400 text-xs px-3 py-1 rounded-full">Crépis</span>
+                        <span class="bg-orange-500/10 text-orange-400 text-xs px-3 py-1 rounded-full">Finitions</span>
+                    </div>
+                </div>
+
+                <!-- Service 6 -->
+                <div class="card-hover bg-gradient-to-br from-orange-500 to-red-600 border border-orange-400/30 rounded-2xl p-8 group relative overflow-hidden">
+                    <div class="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-2xl -translate-y-8 translate-x-8"></div>
+                    <div class="w-14 h-14 bg-white/20 rounded-xl flex items-center justify-center mb-6">
+                        <svg class="w-7 h-7 text-white" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-bold text-white mb-3">Devis Gratuit</h3>
+                    <p class="text-white/80 leading-relaxed mb-6">Vous avez un projet ? Contactez-nous pour obtenir une estimation gratuite et personnalisée sous 48h.</p>
+                    <a href="#contact" class="inline-flex items-center space-x-2 bg-white text-orange-600 font-bold px-6 py-3 rounded-full text-sm hover:bg-orange-50 transition-colors duration-200">
+                        <span>Nous contacter</span>
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                        </svg>
+                    </a>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- Divider -->
+    <div class="section-divider"></div>
+
+    <!-- About Section -->
+    <section id="apropos" class="py-32 bg-gray-900/50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+                <!-- Left content -->
+                <div>
+                    <span class="text-orange-400 text-sm font-semibold uppercase tracking-widest">Qui sommes-nous</span>
+                    <h2 class="text-4xl sm:text-5xl font-black text-white mt-4 mb-6">
+                        Un savoir-faire<br><span class="gradient-text">reconnu</span> à Tremblay
+                    </h2>
+                    <p class="text-gray-400 text-lg leading-relaxed mb-6">
+                        Depuis plus de 15 ans, Maçon Tremblay s'impose comme la référence en maçonnerie dans la région. Notre équipe de professionnels qualifiés intervient sur tous types de chantiers, du particulier au professionnel.
+                    </p>
+                    <p class="text-gray-400 text-lg leading-relaxed mb-10">
+                        Nous mettons un point d'honneur à respecter les délais, les budgets et à livrer des travaux de la plus haute qualité. Votre satisfaction est notre priorité absolue.
+                    </p>
+
+                    <div class="grid grid-cols-2 gap-6">
+                        <div class="bg-gray-900 border border-gray-800 rounded-xl p-6">
+                            <div class="text-3xl font-black gradient-text mb-2">15+</div>
+                            <div class="text-gray-400 text-sm">Années d'expérience dans le métier</div>
+                        </div>
+                        <div class="bg-gray-900 border border-gray-800 rounded-xl p-6">
+                            <div class="text-3xl font-black gradient-text mb-2">500+</div>
+                            <div class="text-gray-400 text-sm">Projets menés à bien avec succès</div>
+                        </div>
+                        <div class="bg-gray-900 border border-gray-800 rounded-xl p-6">
+                            <div class="text-3xl font-black gradient-text mb-2">48h</div>
+                            <div class="text-gray-400 text-sm">Délai de réponse pour vos devis</div>
+                        </div>
+                        <div class="bg-gray-900 border border-gray-800 rounded-xl p-6">
+                            <div class="text-3xl font-black gradient-text mb-2">100%</div>
+                            <div class="text-gray-400 text-sm">Clients satisfaits de nos prestations</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right content - Feature list -->
+                <div class="space-y-6">
+                    <div class="bg-gray-900/80 border border-gray-800 rounded-2xl p-6 flex items-start space-x-5 card-hover">
+                        <div class="w-12 h-12 bg-gradient-to-br from-orange-500 to-red-600 rounded-xl flex items-center justify-center flex-shrink-0">
+                            <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <h4 class="text-white font-bold text-lg mb-1">Qualité garantie</h4>
+                            <p class="text-gray-400">Nos travaux sont réalisés dans le respect des normes en vigueur et garantis pour vous offrir une totale tranquillité d'esprit.</p>
+                        </div>
+                    </div>
+
+                    <div class="bg-gray-900/80 border border-gray-800 rounded-2xl p-6 flex items-start space-x-5 card-hover">
+                        <div class="w-12 h-12 bg-gradient-to-br from-orange-500 to-red-600 rounded-xl flex items-center justify-center flex-shrink-0">
+                            <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zm4.24 16L12 15.45 7.77 18l1.12-4.81-3.73-3.23 4.92-.42L12 5l1.92 4.53 4.92.42-3.73 3.23L16.23 18z"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <h4 class="text-white font-bold text-lg mb-1">Équipe expérimentée</h4>
+                            <p class="text-gray-400">Notre équipe est composée d'artisans qualifiés et passionnés, formés aux techniques les plus modernes de la maçonnerie.</p>
+                        </div>
+                    </div>
+
+                    <div class="bg-gray-900/80 border border-gray-800 rounded-2xl p-6 flex items-start space-x-5 card-hover">
+                        <div class="w-12 h-12 bg-gradient-to-br from-orange-500 to-red-600 rounded-xl flex items-center justify-center flex-shrink-0">
+                            <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <h4 class="text-white font-bold text-lg mb-1">Intervention locale</h4>
+                            <p class="text-gray-400">Basés à Tremblay, nous intervenons rapidement sur l'ensemble de la région pour répondre à tous vos besoins.</p>
+                        </div>
+                    </div>
+
+                    <div class="bg-gray-900/80 border border-gray-800 rounded-2xl p-6 flex items-start space-x-5 card-hover">
+                        <div class="w-12 h-12 bg-gradient-to-br from-orange-500 to-red-600 rounded-xl flex items-center justify-center flex-shrink-0">
+                            <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M11.8 10.9c-2.27-.59-3-1.2-3-2.15 0-1.09 1.01-1.85 2.7-1.85 1.78 0 2.44.85 2.5 2.1h2.21c-.07-1.72-1.12-3.3-3.21-3.81V3h-3v2.16c-1.94.42-3.5 1.68-3.5 3.61 0 2.31 1.91 3.46 4.7 4.13 2.5.6 3 1.48 3 2.41 0 .69-.49 1.79-2.7 1.79-2.06 0-2.87-.92-2.98-2.1h-2.2c.12 2.19 1.76 3.42 3.68 3.83V21h3v-2.15c1.95-.37 3.5-1.5 3.5-3.55 0-2.84-2.43-3.81-4.7-4.4z"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <h4 class="text-white font-bold text-lg mb-1">Tarifs transparents</h4>
+                            <p class="text-gray-400">Devis détaillés et sans surprise. Nous vous accompagnons avec honnêteté et transparence tout au long de votre projet.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Divider -->
+    <div class="section-divider"></div>
+
+    <!-- Contact Section -->
+    <section id="contact" class="py-32 bg-gray-950 relative">
+        <div class="absolute inset-0 overflow-hidden">
+            <div class="absolute bottom-0 left-0 w-96 h-96 bg-orange-500/5 rounded-full blur-3xl"></div>
+            <div class="absolute top-0 right-0 w-64 h-64 bg-blue-600/5 rounded-full blur-3xl"></div>
+        </div>
+
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+            <!-- Section header -->
+            <div class="text-center mb-20">
+                <span class="text-orange-400 text-sm font-semibold uppercase tracking-widest">Parlons de votre projet</span>
+                <h2 class="text-4xl sm:text-5xl lg:text-6xl font-black text-white mt-4 mb-6">
+                    Contactez <span class="gradient-text">Nous</span>
+                </h2>
+                <p class="text-gray-400 text-lg max-w-2xl mx-auto">
+                    Prêt à démarrer votre projet ? Notre équipe est disponible pour vous conseiller et vous proposer un devis gratuit sous 48h.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
+                <!-- Contact info -->
+                <div class="space-y-8">
+                    <div>
+                        <h3 class="text-2xl font-bold text-white mb-8">Nos coordonnées</h3>
+                    </div>
+
+                    <div class="flex items-center space-x-5">
+                        <div class="w-14 h-14 bg-gradient-to-br from-orange-500/20 to-red-600/20 border border-orange-500/30 rounded-xl flex items-center justify-center flex-shrink-0">
+                            <svg class="w-6 h-6 text-orange-400" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <div class="text-white font-semibold">Téléphone</div>
+                            <div class="text-orange-400 text-lg font-bold">+33 (0)1 23 45 67 89</div>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center space-x-5">
+                        <div class="w-14 h-14 bg-gradient-to-br from-orange-500/20 to-red-600/20 border border-orange-500/30 rounded-xl flex items-center justify-center flex-shrink-0">
+                            <svg class="w-6 h-6 text-orange-400" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <div class="text-white font-semibold">Email</div>
+                            <div class="text-orange-400 text-lg font-bold">contact@macon-tremblay.fr</div>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center space-x-5">
+                        <div class="w-14 h-14 bg-gradient-to-br from-orange-500/20 to-red-600/20 border border-orange-500/30 rounded-xl flex items-center justify-center flex-shrink-0">
+                            <svg class="w-6 h-6 text-orange-400" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <div class="text-white font-semibold">Adresse</div>
+                            <div class="text-orange-400 text-lg font-bold">Tremblay, Île-de-France</div>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center space-x-5">
+                        <div class="w-14 h-14 bg-gradient-to-br from-orange-500/20 to-red-600/20 border border-orange-500/30 rounded-xl flex items-center justify-center flex-shrink-0">
+                            <svg class="w-6 h-6 text-orange-400" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <div class="text-white font-semibold">Horaires</div>
+                            <div class="text-orange-400">Lun-Ven: 8h-18h | Sam: 8h-12h</div>
+                        </div>
+                    </div>
+
+                    <!-- CTA Button -->
+                    <div class="pt-4">
+                        <a href="tel:+33123456789" class="inline-flex items-center space-x-3 bg-gradient-to-r from-orange-500 to-red-600 text-white px-8 py-4 rounded-full text-lg font-bold btn-glow w-full justify-center sm:w-auto">
+                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/>
+                            </svg>
+                            <span>Appeler maintenant</span>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Contact form -->
+                <div class="bg-gray-900/80 border border-gray-800 rounded-2xl p-8">
+                    <h3 class="text-2xl font-bold text-white mb-8">Envoyez-nous un message</h3>
+                    <form class="space-y-6">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                            <div>
+                                <label class="block text-gray-400 text-sm font-medium mb-2">Prénom</label>
+                                <input type="text" placeholder="Jean" class="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-colors duration-200">
+                            </div>
+                            <div>
+                                <label class="block text-gray-400 text-sm font-medium mb-2">Nom</label>
+                                <input type="text" placeholder="Dupont" class="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-colors duration-200">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-gray-400 text-sm font-medium mb-2">Email</label>
+                            <input type="email" placeholder="jean.dupont@email.com" class="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-colors duration-200">
+                        </div>
+                        <div>
+                            <label class="block text-gray-400 text-sm font-medium mb-2">Téléphone</label>
+                            <input type="tel" placeholder="+33 6 00 00 00 00" class="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-colors duration-200">
+                        </div>
+                        <div>
+                            <label class="block text-gray-400 text-sm font-medium mb-2">Type de travaux</label>
+                            <select class="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-colors duration-200">
+                                <option value="" class="bg-gray-800">Sélectionner un service</option>
+                                <option value="construction" class="bg-gray-800">Construction neuve</option>
+                                <option value="renovation" class="bg-gray-800">Rénovation & Restauration</option>
+                                <option value="dallage" class="bg-gray-800">Dallage & Carrelage</option>
+                                <option value="murs" class="bg-gray-800">Murs & Clôtures</option>
+                                <option value="enduits" class="bg-gray-800">Enduits & Crépis</option>
+                                <option value="autre" class="bg-gray-800">Autre</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-gray-400 text-sm font-medium mb-2">Description du projet</label>
+                            <textarea rows="4" placeholder="Décrivez votre projet en quelques mots..." class="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-colors duration-200 resize-none"></textarea>
+                        </div>
+                        <button type="submit" class="w-full bg-gradient-to-r from-orange-500 to-red-600 text-white py-4 rounded-xl text-lg font-bold btn-glow transition-all duration-300">
+                            Envoyer ma demande
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 border-t border-gray-800 py-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
+                <div>
+                    <div class="flex items-center space-x-3 mb-4">
+                        <div class="w-10 h-10 bg-gradient-to-br from-orange-500 to-red-600 rounded-xl flex items-center justify-center">
+                            <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <span class="text-xl font-bold text-white">Maçon</span>
+                            <span class="text-xs text-orange-400 block leading-none">Tremblay</span>
+                        </div>
+                    </div>
+                    <p class="text-gray-500 text-sm leading-relaxed">Expert en maçonnerie à Tremblay. Constructions, rénovations et restaurations de qualité depuis plus de 15 ans.</p>
+                </div>
+                <div>
+                    <h4 class="text-white font-semibold mb-4">Services</h4>
+                    <ul class="space-y-2 text-gray-500 text-sm">
+                        <li><a href="#services" class="hover:text-orange-400 transition-colors">Construction neuve</a></li>
+                        <li><a href="#services" class="hover:text-orange-400 transition-colors">Rénovation & Restauration</a></li>
+                        <li><a href="#services" class="hover:text-orange-400 transition-colors">Dallage & Carrelage</a></li>
+                        <li><a href="#services" class="hover:text-orange-400 transition-colors">Murs & Clôtures</a></li>
+                        <li><a href="#services" class="hover:text-orange-400 transition-colors">Enduits & Crépis</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="text-white font-semibold mb-4">Contact</h4>
+                    <ul class="space-y-2 text-gray-500 text-sm">
+                        <li class="flex items-center space-x-2">
+                            <svg class="w-4 h-4 text-orange-400" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+                            <span>Tremblay, Île-de-France</span>
+                        </li>
+                        <li class="flex items-center space-x-2">
+                            <svg class="w-4 h-4 text-orange-400" fill="currentColor" viewBox="0 0 24 24"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>
+                            <span>+33 (0)1 23 45 67 89</span>
+                        </li>
+                        <li class="flex items-center space-x-2">
+                            <svg class="w-4 h-4 text-orange-400" fill="currentColor" viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
+                            <span>contact@macon-tremblay.fr</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <div class="border-t border-gray-800 pt-8 flex flex-col sm:flex-row items-center justify-between">
+                <p class="text-gray-600 text-sm">© 2024 Maçon Tremblay. Tous droits réservés.</p>
+                <p class="text-gray-600 text-sm mt-2 sm:mt-0">Expert Maçonnerie · Tremblay · Île-de-France</p>
+            </div>
+        </div>
+    </footer>
+
+</body>
+</html>
