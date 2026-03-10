@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Boulangerie - Villepinte</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+    h1, h2, h3 { font-family: 'Playfair Display', serif; }
+    .hero-bg {
+      background: linear-gradient(135deg, #1a0a00 0%, #3d1a00 40%, #7c3a00 100%);
+    }
+    .grain-overlay::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.05'/%3E%3C/svg%3E");
+      opacity: 0.15;
+      pointer-events: none;
+    }
+    .card-hover {
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .card-hover:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 25px 50px rgba(0,0,0,0.3);
+    }
+    .nav-blur {
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+    }
+    @keyframes float {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-15px); }
+    }
+    .floating { animation: float 4s ease-in-out infinite; }
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(40px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .fade-in-up { animation: fadeInUp 0.8s ease forwards; }
+    .delay-1 { animation-delay: 0.2s; opacity: 0; }
+    .delay-2 { animation-delay: 0.4s; opacity: 0; }
+    .delay-3 { animation-delay: 0.6s; opacity: 0; }
+    .gold-gradient {
+      background: linear-gradient(135deg, #f59e0b, #d97706, #b45309);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .btn-gold {
+      background: linear-gradient(135deg, #f59e0b, #d97706);
+      transition: all 0.3s ease;
+    }
+    .btn-gold:hover {
+      background: linear-gradient(135deg, #d97706, #b45309);
+      transform: scale(1.05);
+      box-shadow: 0 10px 30px rgba(245, 158, 11, 0.4);
+    }
+    .section-divider {
+      background: linear-gradient(90deg, transparent, #f59e0b, transparent);
+      height: 1px;
+      width: 100%;
+    }
+  </style>
+</head>
+<body class="bg-stone-950 text-stone-100 overflow-x-hidden">
+
+  <!-- NAVIGATION -->
+  <nav class="fixed top-0 left-0 right-0 z-50 nav-blur bg-stone-950/70 border-b border-stone-800/50">
+    <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-full btn-gold flex items-center justify-center text-white font-bold text-lg shadow-lg">
+          🥖
+        </div>
+        <div>
+          <span class="font-bold text-xl tracking-tight text-white" style="font-family:'Playfair Display',serif;">Boulangerie</span>
+          <p class="text-xs text-amber-400 -mt-1 font-medium tracking-widest uppercase">Villepinte</p>
+        </div>
+      </div>
+      <div class="hidden md:flex items-center gap-8">
+        <a href="#accueil" class="text-stone-300 hover:text-amber-400 transition-colors text-sm font-medium">Accueil</a>
+        <a href="#services" class="text-stone-300 hover:text-amber-400 transition-colors text-sm font-medium">Nos Produits</a>
+        <a href="#apropos" class="text-stone-300 hover:text-amber-400 transition-colors text-sm font-medium">À propos</a>
+        <a href="#contact" class="btn-gold text-white px-5 py-2 rounded-full text-sm font-semibold shadow-lg">Contact</a>
+      </div>
+      <button class="md:hidden text-stone-300 hover:text-amber-400" id="menuBtn">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+        </svg>
+      </button>
+    </div>
+    <div id="mobileMenu" class="hidden md:hidden px-6 pb-4 space-y-3 border-t border-stone-800/50 pt-4">
+      <a href="#accueil" class="block text-stone-300 hover:text-amber-400 transition-colors text-sm font-medium">Accueil</a>
+      <a href="#services" class="block text-stone-300 hover:text-amber-400 transition-colors text-sm font-medium">Nos Produits</a>
+      <a href="#apropos" class="block text-stone-300 hover:text-amber-400 transition-colors text-sm font-medium">À propos</a>
+      <a href="#contact" class="block text-amber-400 font-semibold text-sm">Contact</a>
+    </div>
+  </nav>
+
+  <!-- HERO SECTION -->
+  <section id="accueil" class="relative min-h-screen hero-bg flex items-center justify-center overflow-hidden grain-overlay">
+    <!-- Decorative circles -->
+    <div class="absolute top-20 right-20 w-96 h-96 rounded-full bg-amber-500/10 blur-3xl"></div>
+    <div class="absolute bottom-20 left-20 w-64 h-64 rounded-full bg-orange-600/10 blur-3xl"></div>
+    <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-amber-700/5 blur-3xl"></div>
+
+    <div class="relative z-10 max-w-7xl mx-auto px-6 py-32 grid lg:grid-cols-2 gap-16 items-center">
+      <div>
+        <div class="inline-flex items-center gap-2 bg-amber-500/10 border border-amber-500/30 rounded-full px-4 py-2 mb-8 fade-in-up">
+          <span class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
+          <span class="text-amber-300 text-sm font-medium">Artisan Boulanger à Villepinte</span>
+        </div>
+        <h1 class="text-5xl md:text-7xl font-black leading-tight mb-6 fade-in-up delay-1">
+          L'Art du<br/>
+          <span class="gold-gradient">Pain Frais</span><br/>
+          Chaque Jour
+        </h1>
+        <p class="text-stone-400 text-lg leading-relaxed mb-10 max-w-lg fade-in-up delay-2">
+          Depuis des années, notre boulangerie artisanale vous propose des créations faites avec passion, des farines sélectionnées et des recettes transmises de génération en génération.
+        </p>
+        <div class="flex flex-wrap gap-4 fade-in-up delay-3">
+          <a href="#services" class="btn-gold text-white px-8 py-4 rounded-full font-semibold text-base shadow-xl">
+            Découvrir nos produits
+          </a>
+          <a href="#contact" class="border border-stone-600 hover:border-amber-500/60 text-stone-300 hover:text-amber-300 px-8 py-4 rounded-full font-semibold text-base transition-all duration-300">
+            Nous contacter
+          </a>
+        </div>
+        <div class="flex items-center gap-8 mt-12 pt-8 border-t border-stone-800/60 fade-in-up delay-3">
+          <div>
+            <p class="text-3xl font-black text-white" style="font-family:'Playfair Display',serif;">15+</p>
+            <p class="text-stone-400 text-sm">Années d'expérience</p>
+          </div>
+          <div class="w-px h-12 bg-stone-700"></div>
+          <div>
+            <p class="text-3xl font-black text-white" style="font-family:'Playfair Display',serif;">50+</p>
+            <p class="text-stone-400 text-sm">Produits artisanaux</p>
+          </div>
+          <div class="w-px h-12 bg-stone-700"></div>
+          <div>
+            <p class="text-3xl font-black text-white" style="font-family:'Playfair Display',serif;">100%</p>
+            <p class="text-stone-400 text-sm">Fait maison</p>
+          </div>
+        </div>
+      </div>
+      <div class="hidden lg:flex justify-center items-center">
+        <div class="floating relative">
+          <div class="w-80 h-80 rounded-full bg-gradient-to-br from-amber-500/20 to-orange-600/20 border border-amber-500/20 flex items-center justify-center backdrop-blur-sm">
+            <div class="w-64 h-64 rounded-full bg-gradient-to-br from-amber-600/30 to-orange-700/30 border border-amber-400/20 flex items-center justify-center">
+              <span class="text-9xl filter drop-shadow-2xl">🥖</span>
+            </div>
+          </div>
+          <div class="absolute -top-4 -right-4 w-16 h-16 rounded-full bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-3xl">🥐</div>
+          <div class="absolute -bottom-4 -left-4 w-14 h-14 rounded-full bg-orange-600/20 border border-orange-500/40 flex items-center justify-center text-2xl">🍞</div>
+          <div class="absolute top-1/2 -right-12 w-12 h-12 rounded-full bg-amber-700/20 border border-amber-600/40 flex items-center justify-center text-2xl">🧁</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Scroll indicator -->
+    <div class="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 text-stone-500">
+      <span class="text-xs tracking-widest uppercase">Défiler</span>
+      <div class="w-6 h-10 border-2 border-stone-600 rounded-full flex justify-center pt-2">
+        <div class="w-1.5 h-1.5 rounded-full bg-amber-400 animate-bounce"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- DIVIDER -->
+  <div class="section-divider"></div>
+
+  <!-- SERVICES SECTION -->
+  <section id="services" class="py-28 bg-stone-950 relative overflow-hidden">
+    <div class="absolute top-0 right-0 w-96 h-96 rounded-full bg-amber-600/5 blur-3xl"></div>
+    <div class="max-w-7xl mx-auto px-6">
+      <div class="text-center mb-20">
+        <div class="inline-flex items-center gap-2 bg-amber-500/10 border border-amber-500/30 rounded-full px-4 py-2 mb-6">
+          <span class="text-amber-300 text-sm font-medium">✨ Notre savoir-faire</span>
+        </div>
+        <h2 class="text-4xl md:text-6xl font-black mb-6">
+          Nos <span class="gold-gradient">Spécialités</span>
+        </h2>
+        <p class="text-stone-400 text-lg max-w-2xl mx-auto">
+          Chaque produit est élaboré avec soin, en utilisant des ingrédients de qualité supérieure et des techniques artisanales transmises avec amour.
+        </p>
+      </div>
+
+      <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+        <!-- Card 1 -->
+        <div class="card-hover bg-stone-900/60 border border-stone-800/60 rounded-2xl p-8 backdrop-blur-sm group">
+          <div class="w-16 h-16 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-3xl mb-6 group-hover:scale-110 transition-transform duration-300">
+            🥖
+          </div>
+          <h3 class="text-xl font-bold text-white mb-3">Pains Artisanaux</h3>
+          <p class="text-stone-400 text-sm leading-relaxed mb-4">
+            Baguettes tradition, pains de campagne, pain au levain naturel, pain aux céréales... Cuits au four à sole pour une croûte dorée parfaite.
+          </p>
+          <div class="flex flex-wrap gap-2">
+            <span class="px-3 py-1 bg-amber-500/10 text-amber-400 rounded-full text-xs border border-amber-500/20">Tradition</span>
+            <span class="px-3 py-1 bg-amber-500/10 text-amber-400 rounded-full text-xs border border-amber-500/20">Levain</span>
+            <span class="px-3 py-1 bg-amber-500/10 text-amber-400 rounded-full text-xs border border-amber-500/20">Céréales</span>
+          </div>
+        </div>
+
+        <!-- Card 2 -->
+        <div class="card-hover bg-stone-900/60 border border-stone-800/60 rounded-2xl p-8 backdrop-blur-sm group">
+          <div class="w-16 h-16 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-3xl mb-6 group-hover:scale-110 transition-transform duration-300">
+            🥐
+          </div>
+          <h3 class="text-xl font-bold text-white mb-3">Viennoiseries</h3>
+          <p class="text-stone-400 text-sm leading-relaxed mb-4">
+            Croissants feuilletés au beurre, pains au chocolat, chaussons aux pommes et brioches moelleuses préparés avec un beurre AOP de qualité.
+          </p>
+          <div class="flex flex-wrap gap-2">
+            <span class="px-3 py-1 bg-amber-500/10 text-amber-400 rounded-full text-xs border border-amber-500/20">Croissants</span>
+            <span class="px-3 py-1 bg-amber-500/10 text-amber-400 rounded-full text-xs border border-amber-500/20">Brioche</span>
+            <span class="px-3 py-1 bg-amber-500/10 text-amber-400 rounded-full text-xs border border-amber-500/20">Beurre AOP</span>
+          </div>
+        </div>
+
+        <!-- Card 3 -->
+        <div class="card-hover bg-stone-900/60 border border-stone-800/60 rounded-2xl p-8 backdrop-blur-sm group">
+          <div class="w-16 h-16 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-3xl mb-6 group-hover:scale-110 transition-transform duration-300">
+            🎂
+          </div>
+          <h3 class="text-xl font-bold text-white mb-3">Pâtisseries</h3>
+          <p class="text-stone-400 text-sm leading-relaxed mb-4">
+            Éclairs, tartes, millefeuilles, religieuses et entremets créatifs. Des desserts d'exception pour toutes vos occasions et célébrations.
+          </p>
+          <div class="flex flex-wrap gap-2">
+            <span class="px-3 py-1 bg-amber-500/10 text-amber-400 rounded-full text-xs border border-amber-500/20">Éclairs</span>
+            <span class="px-3 py-1 bg-amber-500/10 text-amber-400 rounded-full text-xs border border-amber-500/20">Tartes</span>
+            <span class="px-3 py-1 bg-amber-500/10 text-amber-400 rounded-full text-xs border border-amber-500/20">Entremets</span>
+          </div>
+        </div>
+
+        <!-- Card 4 -->
+        <div class="card-hover bg-stone-900/60 border border-stone-800/60 rounded-2xl p-8 backdrop-blur-sm group">
+          <div class="w-16 h-16 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-3xl mb-6 group-hover:scale-110 transition-transform duration-300">
+            🎁
+          </div>
+          <h3 class="text-xl font-bold text-white mb-3">Commandes Spéciales</h3>
+          <p class="text-stone-400 text-sm leading-relaxed mb-4">
+            Pièces montées, gâteaux d'anniversaire personnalisés, commandes pour mariages et événements d'entreprise sur mesure.
+          </p>
+          <div class="flex flex-wrap gap-2">
+            <span class="px-3 py-1 bg-amber-500/10 text-amber-400 rounded-full text-xs border border-amber-500/20">Mariage</span>
+            <span class="px-3 py-1 bg-amber-500/10 text-amber-400 rounded-full text-xs border border-amber-500/20">Anniversaire</span>
+            <span class="px-3 py-1 bg-amber-500/10 text-amber-400 rounded-full text-xs border border-amber-500/20">Événement</span>
+          </div>
+        </div>
+
+        <!-- Card 5 -->
+        <div class="card-hover bg-stone-900/60 border border-stone-800/60 rounded-2xl p-8 backdrop-blur-sm group">
+          <div class="w-16 h-16 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-3xl mb-6 group-hover:scale-110 transition-transform duration-300">
+            ☕
+          </div>
+          <h3 class="text-xl font-bold text-white mb-3">Sandwichs & Snacking</h3>
+          <p class="text-stone-400 text-sm leading-relaxed mb-4">
+            Sandwichs frais préparés sur mesure, quiches du jour, salades et formules déjeuner pour une pause gourmande et rapide.
+          </p>
+          <div class="flex flex-wrap gap-2">
+            <span class="px-3 py-1 bg-amber-500/10 text-amber-400 rounded-full text-xs border border-amber-500/20">Sandwich</span>
+            <span class="px-3 py-1 bg-amber-500/10 text-amber-400 rounded-full text-xs border border-amber-500/20">Quiche</span>
+            <span class="px-3 py-1 bg-amber-500/10 text-amber-400 rounded-full text-xs border border-amber-500/20">Formule</span>
+          </div>
+        </div>
+
+        <!-- Card 6 -->
+        <div class="card-hover bg-gradient-to-br from-amber-600/20 to-orange-700/20 border border-amber-500/30 rounded-2xl p-8 backdrop-blur-sm group relative overflow-hidden">
+          <div class="absolute inset-0 bg-gradient-to-br from-amber-500/5 to-transparent"></div>
+          <div class="relative z-10">
+            <div class="w-16 h-16 rounded-2xl bg-amber-500/20 border border-amber-400/40 flex items-center justify-center text-3xl mb-6 group-hover:scale-110 transition-transform duration-300">
+              🌾
+            </div>
+            <h3 class="text-xl font-bold text-white mb-3">Produits Bio & Locaux</h3>
+            <p class="text-stone-300 text-sm leading-relaxed mb-4">
+              Sélection de farines biologiques, produits issus de producteurs locaux d'Île-de-France pour un engagement responsable.
+            </p>
+            <div class="flex flex-wrap gap-2">
+              <span class="px-3 py-1 bg-amber-400/20 text-amber-300 rounded-full text-xs border border-amber-400/30">Bio</span>
+              <span class="px-3 py-1 bg-amber-400/20 text-amber-300 rounded-full text-xs border border-amber-400/30">Local</span>
+              <span class="px-3 py-1 bg-amber-400/20 text-amber-300 rounded-full text-xs border border-amber-400/30">Île-de-France</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- DIVIDER -->
+  <div class="section-divider"></div>
+
+  <!-- À PROPOS SECTION -->
+  <section id="apropos" class="py-28 bg-stone-900/40 relative overflow-hidden">
+    <div class="absolute bottom-0 left-0 w-96 h-96 rounded-full bg-amber-700/5 blur-3xl"></div>
+    <div class="max-w-7xl mx-auto px-6">
+      <div class="grid lg:grid-cols-2 gap-16 items-center">
+        <div>
+          <div class="inline-flex items-center gap-2 bg-amber-500/10 border border-amber-500/30 rounded-full px-4 py-2 mb-8">
+            <span class="text-amber-300 text-sm font-medium">🏡 Notre histoire</span>
+          </div>
+          <h2 class="text-4xl md:text-5xl font-black mb-6">
+            Une Passion<br/>
+            <span class="gold-gradient">Transmise de Père en Fils</span>
+          </h2>
+          <p class="text-stone-400 text-base leading-relaxed mb-6">
+            Implantée au cœur de Villepinte, notre boulangerie est bien plus qu'un simple commerce. C'est un lieu de vie, de partage et de gourmandise où chaque matin, l'odeur du pain frais embaume nos rues.
+          </p>
+          <p class="text-stone-400 text-base leading-relaxed mb-8">
+            Nous travaillons exclusivement avec des farines de qualité, des fermentations longues et des techniques artisanales pour vous offrir des produits d'exception. Chaque baguette, chaque croissant est le fruit d'un travail rigoureux et passionné.
+          </p>
+          <div class="grid grid-cols-2 gap-4">
+            <div class="bg-stone-900/60 border border-stone-800/60 rounded-xl p-5">
+              <div class="text-2xl mb-2">⏰</div>
+              <h4 class="font-semibold text-white text-sm mb-1">Horaires d'ouverture</h4>
+              <p class="text-stone-400 text-xs">Lun-Sam : 7h00 - 19h30</p>
+              <p class="text-stone-400 text-xs">Dimanche : 7h00 - 13h00</p>
+            </div>
+            <div class="bg-stone-900/60 border border-stone-800/60 rounded-xl p-5">
+              <div class="text-2xl mb-2">📍</div>
+              <h4 class="font-semibold text-white text-sm mb-1">Notre adresse</h4>
+              <p class="text-stone-400 text-xs">Villepinte</p>
+              <p class="text-stone-400 text-xs">Seine-Saint-Denis (93)</p>
+            </div>
+          </div>
+        </div>
+        <div class="grid grid-cols-2 gap-4">
+          <div class="space-y-4">
+            <div class="bg-gradient-to-br from-amber-600/20 to-stone-900 border border-amber-500/20 rounded-2xl p-6 text-center">
+              <p class="text-5xl font-black text-amber-400 mb-2" style="font-family:'Playfair Display',serif;">15</p>
+              <p class="text-stone-400 text-sm">Années d'expérience</p>
+            </div>
+            <div class="bg-stone-900/60 border border-stone-800/60 rounded-2xl p-6 text-center">
+              <p class="text-5xl font-black text-white mb-2" style="font-family:'Playfair Display',serif;">50+</p>
+              <p class="text-stone-400 text-sm">Références produits</p>
+            </div>
+          </div>
+          <div class="space-y-4 mt-8">
+            <div class="bg-stone-900/60 border border-stone-800/60 rounded-2xl p-6 text-center">
+              <p class="text-5xl font-black text-white mb-2" style="font-family:'Playfair Display',serif;">98%</p>
+              <p class="text-stone-400 text-sm">Clients satisfaits</p>
+            </div>
+            <div class="bg-gradient-to-br from-orange-700/20 to-stone-900 border border-orange-600/20 rounded-2xl p-6 text-center">
+              <p class="text-5xl font-black text-orange-400 mb-2" style="font-family:'Playfair Display',serif;">🏆</p>
+              <p class="text-stone-400 text-sm">Artisan primé</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TESTIMONIALS -->
+  <section class="py-20 bg-stone-950">
+    <div class="max-w-7xl mx-auto px-6">
+      <div class="text-center mb-16">
+        <h2 class="text-3xl md:text-4xl font-black mb-4">Ce que disent <span class="gold-gradient">nos clients</span></h2>
+      </div>
+      <div class="grid md:grid-cols-3 gap-6">
+        <div class="bg-stone-900/60 border border-stone-800/60 rounded-2xl p-6 backdrop-blur-sm">
+          <div class="flex gap-1 mb-4">
+            <span class="text-amber-400">★★★★★</span>
+          </div>
+          <p class="text-stone-400 text-sm leading-relaxed mb-4">"Les meilleures baguettes de Villepinte ! La pâte est légère, la croûte parfaitement croustillante. Je ne vais nulle part ailleurs."</p>
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-full bg-amber-500/20 border border-amber-500/30 flex items-center justify-center text-sm font-bold text-amber-400">M</div>
+            <div>
+              <p class="text-white text-sm font-semibold">Marie L.</p>
+              <p class="text-stone-500 text-xs">Cliente fidèle</p>
+            </div>
+          </div>
+        </div>
+        <div class="bg-stone-900/60 border border-stone-800/60 rounded-2xl p-6 backdrop-blur-sm">
+          <div class="flex gap-1 mb-4">
+            <span class="text-amber-400">★★★★★</span>
+          </div>
+          <p class="text-stone-400 text-sm leading-relaxed mb-4">"J'ai commandé ma pièce montée ici pour mon mariage. Un travail exceptionnel, professionnel et délicieux. Merci infiniment !"</p>
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-full bg-amber-500/20 border border-amber-500/30 flex items-center justify-center text-sm font-bold text-amber-400">T</div>
+            <div>
+              <p class="text-white text-sm font-semibold">Thomas & Julie</p>
+              <p class="text-stone-500 text-xs">Jeunes mariés</p>
+            </div>
+          </div>
+        </div>
+        <div class="bg-stone-900/60 border border-stone-800/60 rounded-2xl p-6 backdrop-blur-sm">
+          <div class="flex gap-1 mb-4">
+            <span class="text-amber-400">★★★★★</span>
+          </div>
+          <p class="text-stone-400 text-sm leading-relaxed mb-4">"Les croissants du dimanche matin sont un vrai rituel chez nous. Feuilletés, beurrés, absolument parfaits. Une adresse incontournable !"</p>
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-full bg-amber-500/20 border border-amber-500/30 flex items-center justify-center text-sm font-bold text-amber-400">S</div>
+            <div>
+              <p class="text-white text-sm font-semibold">Sophie D.</p>
+              <p class="text-stone-500 text-xs">Cliente régulière</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- DIVIDER -->
+  <div class="section-divider"></div>
+
+  <!-- CONTACT SECTION -->
+  <section id="contact" class="py-28 bg-stone-900/40 relative overflow-hidden">
+    <div class="absolute top-0 right-0 w-80 h-80 rounded-full bg-amber-600/8 blur-3xl"></div>
+    <div class="max-w-4xl mx-auto px-6">
+      <div class="text-center mb-16">
+        <div class="inline-flex items-center gap-2 bg-amber-500/10 border border-amber-500/30 rounded-full px-4 py-2 mb-6">
+          <span class="text-amber-300 text-sm font-medium">💬 Nous écrire</span>
+        </div>
+        <h2 class="text-4xl md:text-6xl font-black mb-6">
+          Contactez<br/><span class="gold-gradient">Notre Équipe</span>
+        </h2>
+        <p class="text-stone-400 text-lg max-w-xl mx-auto">
+          Une question, une commande spéciale ou simplement envie de nous dire bonjour ? Nous sommes là pour vous !
+        </p>
+      </div>
+
+      <div class="grid md:grid-cols-3 gap-6 mb-12">
+        <div class="bg-stone-900/60 border border-stone-800/60 rounded-2xl p-6 text-center backdrop-blur-sm hover:border-amber-500/30 transition-colors">
+          <div class="w-12 h-12 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-2xl mx-auto mb-4">📞</div>
+          <h4 class="text-white font-semibold mb-2">Téléphone</h4>
+          <p class="text-stone-400 text-sm">Appelez-nous directement</p>
+          <p class="text-amber-400 text-sm font-medium mt-1">Disponible aux heures d'ouverture</p>
+        </div>
+        <div class="bg-stone-900/60 border border-stone-800/60 rounded-2xl p-6 text-center backdrop-blur-sm hover:border-amber-500/30 transition-colors">
+          <div class="w-12 h-12 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-2xl mx-auto mb-4">📍</div>
+          <h4 class="text-white font-semibold mb-2">Adresse</h4>
+          <p class="text-stone-400 text-sm">Villepinte</p>
+          <p class="text-amber-400 text-sm font-medium mt-1">Seine-Saint-Denis, 93</p>
+        </div>
+        <div class="bg-stone-900/60 border border-stone-800/60 rounded-2xl p-6 text-center backdrop-blur-sm hover:border-amber-500/30 transition-colors">
+          <div class="w-12 h-12 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-2xl mx-auto mb-4">⏰</div>
+          <h4 class="text-white font-semibold mb-2">Horaires</h4>
+          <p class="text-stone-400 text-sm">Lun-Sam : 7h - 19h30</p>
+          <p class="text-amber-400 text-sm font-medium mt-1">Dim : 7h - 13h00</p>
+        </div>
+      </div>
+
+      <div class="bg-stone-900/60 border border-stone-800/60 rounded-3xl p-8 md:p-10 backdrop-blur-sm">
+        <form class="space-y-6">
+          <div class="grid md:grid-cols-2 gap-6">
+            <div>
+              <label class="block text-stone-300 text-sm font-medium mb-2">Prénom et Nom</label>
+              <input type="text" placeholder="Jean Dupont" class="w-full bg-stone-800/60 border border-stone-700/60 rounded-xl px-4 py-3 text-stone-100 placeholder-stone-500 focus:outline-none focus:border-amber-500/60 focus:ring-1 focus:ring-amber-500/30 transition-all text-sm" />
+            </div>
+            <div>
+              <label class="block text-stone-300 text-sm font-medium mb-2">Email</label>
+              <input type="email" placeholder="jean@email.com" class="w-full bg-stone-800/60 border border-stone-700/60 rounded-xl px-4 py-3 text-stone-100 placeholder-stone-500 focus:outline-none focus:border-amber-500/60 focus:ring-1 focus:ring-amber-500/30 transition-all text-sm" />
+            </div>
+          </div>
+          <div>
+            <label class="block text-stone-300 text-sm font-medium mb-2">Sujet</label>
+            <select class="w-full bg-stone-800/60 border border-stone-700/60 rounded-xl px-4 py-3 text-stone-300 focus:outline-none focus:border-amber-500/60 focus:ring-1 focus:ring-amber-500/30 transition-all text-sm">
+              <option value="">Sélectionnez un sujet</option>
+              <option value="commande">Commande spéciale</option>
+              <option value="mariage">Pièce montée / Mariage</option>
+              <option value="anniversaire">Gâteau d'anniversaire</option>
+              <option value="info">Renseignement général</option>
+              <option value="autre">Autre</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-stone-300 text-sm font-medium mb-2">Votre message</label>
+            <textarea rows="4" placeholder="Décrivez votre demande, votre commande ou votre question..." class="w-full bg-stone-800/60 border border-stone-700/60 rounded-xl px-4 py-3 text-stone-100 placeholder-stone-500 focus:outline-none focus:border-amber-500/60 focus:ring-1 focus:ring-amber-500/30 transition-all text-sm resize-none"></textarea>
+          </div>
+          <div class="flex items-center gap-3">
+            <input type="checkbox" id="consent" class="w-4 h-4 rounded border-stone-600 bg-stone-800 text-amber-500 focus:ring-amber-500/30" />
+            <label for="consent" class="text-stone-400 text-sm">J'accepte que mes données soient utilisées pour traiter ma demande.</label>
+          </div>
+          <button type="submit" class="w-full btn-gold text-white py-4 rounded-xl font-semibold text-base shadow-xl tracking-wide">
+            ✉️ Envoyer mon message
+          </button>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="bg-stone-950 border-t border-stone-800/60 py-16">
+    <div class="max-w-7xl mx-auto px-6">
+      <div class="grid md:grid-cols-4 gap-10 mb-12">
+        <div class="md:col-span-2">
+          <div class="flex items-center gap-3 mb-4">
+            <div class="w-10 h-10 rounded-full btn-gold flex items-center justify-center text-white font-bold text-lg">🥖</div>
+            <div>
+              <span class="font-bold text-xl text-white" style="font-family:'Playfair Display',serif;">Boulangerie</span>
+              <p class="text-xs text-amber-400 -mt-1 font-medium tracking-widest uppercase">Villepinte</p>
+            </div>
+          </div>
+          <p class="text-stone-400 text-sm leading-relaxed max-w-xs">
+            Artisan boulanger passionné à Villepinte, nous vous proposons chaque jour des produits frais et de qualité, fabriqués avec amour.
+          </p>
+          <div class="flex gap-3 mt-6">
+            <a href="#" class="w-9 h-9 rounded-full bg-stone-800 border border-stone-700 hover:border-amber-500/50 flex items-center justify-center text-stone-400 hover:text-amber-400 transition-all">
+              <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+            </a>
+            <a href="#" class="w-9 h-9 rounded-full bg-stone-800 border border-stone-700 hover:border-amber-500/50 flex items-center justify-center text-stone-400 hover:text-amber-400 transition-all">
+              <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12.017 0C5.396 0 .029 5.367.029 11.987c0 5.079 3.158 9.417 7.618 11.162-.105-.949-.2-2.405.042-3.441.218-.937 1.407-5.965 1.407-5.965s-.359-.719-.359-1.782c0-1.668.967-2.914 2.171-2.914 1.023 0 1.518.769 1.518 1.69 0 1.029-.655 2.568-.994 3.995-.283 1.194.599 2.169 1.777 2.169 2.133 0 3.772-2.249 3.772-5.495 0-2.873-2.064-4.882-5.012-4.882-3.414 0-5.418 2.561-5.418 5.207 0 1.031.397 2.138.893 2.738a.36.36 0 01.083.345l-.333 1.36c-.053.22-.174.267-.402.161-1.499-.698-2.436-2.889-2.436-4.649 0-3.785 2.75-7.262 7.929-7.262 4.163 0 7.398 2.967 7.398 6.931 0 4.136-2.607 7.464-6.227 7.464-1.216 0-2.359-.632-2.75-1.378l-.748 2.853c-.271 1.043-1.002 2.35-1.492 3.146C9.57 23.812 10.763 24.009 12.017 24c6.624 0 11.99-5.367 11.99-11.987C24.007 5.367 18.641 0 12.017 0z"/></svg>
+            </a>
+            <a href="#" class="w-9 h-9 rounded-full bg-stone-800 border border-stone-700 hover:border-amber-500/50 flex items-center justify-center text-stone-400 hover:text-amber-400 transition-all">
+              <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+            </a>
+          </div>
+        </div>
+        <div>
+          <h4 class="text-white font-semibold mb-4 text-sm uppercase tracking-wider">Navigation</h4>
+          <ul class="space-y-2">
+            <li><a href="#accueil" class="text-stone-400 hover:text-amber-400 text-sm transition-colors">Accueil</a></li>
+            <li><a href="#services" class="text-stone-400 hover:text-amber-400 text-sm transition-colors">Nos Produits</a></li>
+            <li><a href="#apropos" class="text-stone-400 hover:text-amber-400 text-sm transition-colors">À propos</a></li>
+            <li><a href="#contact" class="text-stone-400 hover:text-amber-400 text-sm transition-colors">Contact</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4 class="text-white font-semibold mb-4 text-sm uppercase tracking-wider">Horaires</h4>
+          <ul class="space-y-2 text-sm text-stone-400">
+            <li class="flex justify-between gap-4"><span>Lundi - Vendredi</span><span class="text-amber-400">7h - 19h30</span></li>
+            <li class="flex justify-between gap-4"><span>Samedi</span><span class="text-amber-400">7h - 19h30</span></li>
+            <li class="flex justify-between gap-4"><span>Dimanche</span><span class="text-amber-400">7h - 13h</span></li>
+          </ul>
+        </div>
+      </div>
+      <div class="border-t border-stone-800/60 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
+        <p class="text-stone-500 text-sm">© 2024 Boulangerie - Villepinte. Tous droits réservés.</p>
+        <p class="text-stone-600 text-xs">Artisan Boulanger passionné 🥖</p>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // Mobile menu toggle
+    document.getElementById('menuBtn').addEventListener('click', function() {
+      const menu = document.getElementById('mobileMenu');
+      menu.classList.toggle('hidden');
+    });
+
+    // Smooth scroll for anchor links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', function(e) {
+        e.preventDefault();
+        const target = document.querySelector(this.getAttribute('href'));
+        if (target) {
+          const offset = 80;
+          const top = target.getBoundingClientRect().top + window.scrollY - offset;
+          window.scrollTo({ top, behavior: 'smooth' });
+          // Close mobile menu if open
+          document.getElementById('mobileMenu').classList.add('hidden');
+        }
+      });
+    });
+
+    // Intersection Observer for animations
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.style.opacity = '1';
+          entry.target.style.transform = 'translateY(0)';
+          entry.target.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+        }
+      });
+    }, { threshold: 0.1 });
+
+    document.querySelectorAll('.card-hover').forEach(card => {
+      card.style.opacity = '0';
+      card.style.transform = 'translateY(30px)';
+      observer.observe(card);
+    });
+  </script>
+</body>
+</html>
