@@ -1,0 +1,860 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>CyberWatch — Veille Cyber</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg0:#080c18;--bg1:#0d1220;--bg2:#111827;--bg3:#1a2235;
+  --border:#1e2d4a;--border2:#243352;
+  --t1:#dde4f0;--t2:#7a8aaa;--t3:#3a4a6a;
+  --green:#00e87a;--green2:#00b85e;--greenbg:#00e87a0d;
+  --red:#ff4455;--redbg:#ff44550d;
+  --amber:#ffaa00;--amberbg:#ffaa000d;
+  --blue:#3b9eff;--bluebg:#3b9eff0d;
+  --purple:#a855f7;--purplebg:#a855f70d;
+}
+html,body{background:var(--bg0);color:var(--t1);font-family:'IBM Plex Sans',sans-serif;min-height:100vh;-webkit-font-smoothing:antialiased}
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-track{background:var(--bg0)}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+::selection{background:#00e87a20;color:var(--green)}
+
+/* Layout */
+.shell{display:flex;min-height:100vh}
+.sidebar{width:56px;background:var(--bg1);border-right:1px solid var(--border);display:flex;flex-direction:column;align-items:center;padding:16px 0;position:fixed;top:0;left:0;height:100vh;z-index:100}
+.logo{font-family:'IBM Plex Mono',monospace;color:var(--green);font-size:18px;margin-bottom:24px;cursor:default;user-select:none}
+.nav-btn{width:40px;height:40px;border:none;background:none;color:var(--t3);cursor:pointer;border-radius:6px;font-size:18px;display:flex;align-items:center;justify-content:center;margin:2px 0;transition:all .15s;position:relative}
+.nav-btn:hover{color:var(--t2);background:var(--bg3)}
+.nav-btn.active{color:var(--green);background:var(--greenbg)}
+.nav-btn .tooltip{position:absolute;left:52px;background:var(--bg2);border:1px solid var(--border);color:var(--t1);font-size:11px;font-family:'IBM Plex Mono',monospace;padding:4px 8px;border-radius:4px;white-space:nowrap;pointer-events:none;opacity:0;transition:opacity .15s;z-index:200}
+.nav-btn:hover .tooltip{opacity:1}
+.dot-live{width:6px;height:6px;border-radius:50%;background:var(--green);margin-top:auto;margin-bottom:8px;animation:pulse 2.5s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1;box-shadow:0 0 0 0 #00e87a40}50%{opacity:.6;box-shadow:0 0 0 4px #00e87a00}}
+
+.main{margin-left:56px;flex:1;display:flex;flex-direction:column;min-height:100vh}
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:12px 20px;border-bottom:1px solid var(--border);background:var(--bg1);position:sticky;top:0;z-index:50}
+.topbar-left{display:flex;align-items:center;gap:10px}
+.topbar-title{font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:600;color:var(--t1);letter-spacing:.08em}
+.topbar-sub{font-size:11px;color:var(--t3);font-family:'IBM Plex Mono',monospace}
+.topbar-right{display:flex;align-items:center;gap:12px;font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--t3)}
+.live-badge{display:flex;align-items:center;gap:5px;color:var(--green);font-size:10px}
+.live-badge span{width:5px;height:5px;border-radius:50%;background:var(--green);animation:pulse 2s infinite}
+
+/* Pages */
+.page{display:none;flex:1;padding:20px}
+.page.active{display:flex;flex-direction:column}
+
+/* API Key modal */
+.modal-overlay{position:fixed;inset:0;background:#00000090;z-index:1000;display:flex;align-items:center;justify-content:center}
+.modal{background:var(--bg2);border:1px solid var(--border2);border-radius:10px;padding:28px;width:480px;max-width:90vw}
+.modal h2{font-family:'IBM Plex Mono',monospace;font-size:15px;color:var(--t1);margin-bottom:8px}
+.modal p{font-size:13px;color:var(--t2);margin-bottom:20px;line-height:1.6}
+.modal input{width:100%;margin-bottom:12px;font-size:13px}
+.modal-actions{display:flex;gap:8px;justify-content:flex-end}
+.warning{background:#ffaa000d;border:1px solid #ffaa0030;border-radius:6px;padding:10px 12px;font-size:12px;color:var(--amber);margin-bottom:16px;line-height:1.5}
+
+/* Cards */
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:8px;position:relative}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,#00e87a18,transparent);border-radius:8px 8px 0 0}
+
+/* Buttons */
+.btn{padding:8px 16px;border-radius:6px;font-family:'IBM Plex Mono',monospace;font-size:12px;cursor:pointer;border:1px solid;transition:all .15s;display:inline-flex;align-items:center;gap:6px}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.btn-green{background:var(--greenbg);border-color:#00e87a40;color:var(--green)}
+.btn-green:hover:not(:disabled){background:#00e87a18;border-color:#00e87a60}
+.btn-red{background:var(--redbg);border-color:#ff445540;color:var(--red)}
+.btn-amber{background:var(--amberbg);border-color:#ffaa0040;color:var(--amber)}
+.btn-ghost{background:none;border-color:var(--border);color:var(--t2)}
+.btn-ghost:hover{color:var(--t1);border-color:var(--border2)}
+
+/* Inputs */
+input,textarea,select{background:var(--bg1);border:1px solid var(--border);color:var(--t1);border-radius:5px;font-family:'IBM Plex Mono',monospace;font-size:12px;padding:8px 10px;outline:none;transition:border-color .15s;width:100%}
+input:focus,textarea:focus,select:focus{border-color:#00e87a50;box-shadow:0 0 0 2px #00e87a10}
+select option{background:var(--bg2)}
+
+/* Tags / badges */
+.tag{font-size:10px;padding:2px 7px;border-radius:12px;font-family:'IBM Plex Mono',monospace;border:1px solid;white-space:nowrap}
+.tag-green{color:var(--green);background:var(--greenbg);border-color:#00e87a25}
+.tag-red{color:var(--red);background:var(--redbg);border-color:#ff445525}
+.tag-amber{color:var(--amber);background:var(--amberbg);border-color:#ffaa0025}
+.tag-blue{color:var(--blue);background:var(--bluebg);border-color:#3b9eff25}
+.tag-purple{color:var(--purple);background:var(--purplebg);border-color:#a855f725}
+.tag-gray{color:var(--t2);background:var(--bg3);border-color:var(--border)}
+
+/* Article card */
+.article{background:var(--bg2);border:1px solid var(--border);border-radius:7px;padding:14px 16px;transition:border-color .15s}
+.article:hover{border-color:var(--border2)}
+.article-meta{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:8px}
+.article-title{font-size:13px;font-weight:500;color:var(--t1);line-height:1.45;margin-bottom:6px}
+.article-title a{color:inherit;text-decoration:none}
+.article-title a:hover{color:var(--green)}
+.article-snippet{font-size:12px;color:var(--t2);line-height:1.6;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.article-footer{margin-top:10px;display:flex;align-items:center;gap:8px}
+.article-source{font-size:10px;font-family:'IBM Plex Mono',monospace;color:var(--t3)}
+.article-date{font-size:10px;font-family:'IBM Plex Mono',monospace;color:var(--t3);margin-left:auto}
+
+/* Topic pills */
+.topic-grid{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px}
+.topic-pill{padding:6px 12px;border-radius:20px;font-size:11px;font-family:'IBM Plex Mono',monospace;cursor:pointer;border:1px solid var(--border);color:var(--t2);background:none;transition:all .15s}
+.topic-pill:hover{border-color:var(--border2);color:var(--t1)}
+.topic-pill.on{background:var(--greenbg);border-color:#00e87a40;color:var(--green)}
+
+/* Stat cards */
+.stats-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:20px}
+.stat{background:var(--bg2);border:1px solid var(--border);border-radius:7px;padding:14px}
+.stat-label{font-size:10px;font-family:'IBM Plex Mono',monospace;color:var(--t3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px}
+.stat-val{font-size:24px;font-family:'IBM Plex Mono',monospace;font-weight:600}
+
+/* AI output */
+.ai-output{background:var(--bg1);border:1px solid var(--border);border-radius:6px;padding:16px;font-size:13px;line-height:1.75;color:var(--t1);min-height:80px;white-space:pre-wrap;font-family:'IBM Plex Sans',sans-serif}
+.ai-output h2{font-size:13px;font-family:'IBM Plex Mono',monospace;font-weight:600;color:var(--green);margin:12px 0 6px}
+.ai-output h3{font-size:12px;font-family:'IBM Plex Mono',monospace;font-weight:500;color:var(--blue);margin:8px 0 4px}
+.ai-output li{margin-left:16px;margin-bottom:3px;color:var(--t2)}
+.ai-output strong{color:var(--t1);font-weight:500}
+.cursor::after{content:'█';color:var(--green);animation:blink 1s step-end infinite;font-size:.8em}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+
+/* IOC table */
+.ioc-section{margin-bottom:16px}
+.ioc-title{font-size:10px;font-family:'IBM Plex Mono',monospace;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.ioc-item{background:var(--bg1);border:1px solid var(--border);border-radius:5px;padding:8px 12px;margin-bottom:4px;font-size:12px;font-family:'IBM Plex Mono',monospace;color:var(--t1)}
+.ioc-ctx{font-size:11px;color:var(--t2);font-family:'IBM Plex Sans',sans-serif;margin-top:2px}
+
+/* Filters row */
+.filters{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:16px}
+.filters input{max-width:220px}
+.filters select{max-width:150px;width:auto}
+
+/* Section header */
+.sec-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.sec-title{font-size:11px;font-family:'IBM Plex Mono',monospace;color:var(--t3);text-transform:uppercase;letter-spacing:.08em}
+
+/* Grid layout for pages */
+.two-col{display:grid;grid-template-columns:220px 1fr;gap:16px;flex:1}
+.sidebar-panel{display:flex;flex-direction:column;gap:4px}
+.panel-label{font-size:10px;font-family:'IBM Plex Mono',monospace;color:var(--t3);text-transform:uppercase;letter-spacing:.06em;margin:12px 0 6px;padding-left:4px}
+.panel-btn{padding:7px 10px;border-radius:5px;font-size:11px;font-family:'IBM Plex Mono',monospace;cursor:pointer;border:1px solid transparent;color:var(--t2);background:none;text-align:left;transition:all .15s;display:flex;align-items:center;gap:6px}
+.panel-btn:hover{color:var(--t1);background:var(--bg3)}
+.panel-btn.on{background:var(--greenbg);border-color:#00e87a30;color:var(--green)}
+
+/* Grid bg */
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(0,232,122,.02) 1px,transparent 1px),linear-gradient(90deg,rgba(0,232,122,.02) 1px,transparent 1px);background-size:44px 44px;pointer-events:none;z-index:0}
+.main{position:relative;z-index:1}
+
+/* Scrollable content area */
+.content-scroll{flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:10px}
+
+/* Separator */
+.sep{height:1px;background:var(--border);margin:16px 0}
+
+/* Empty state */
+.empty{display:flex;align-items:center;justify-content:center;flex:1;color:var(--t3);font-size:13px;font-family:'IBM Plex Mono',monospace;text-align:center;padding:40px;flex-direction:column;gap:8px}
+.empty span{font-size:24px}
+
+/* Responsive */
+@media(max-width:640px){.two-col{grid-template-columns:1fr}.sidebar-panel{flex-direction:row;flex-wrap:wrap}.filters{flex-direction:column;align-items:stretch}.filters input,.filters select{max-width:100%}}
+</style>
+</head>
+<body>
+
+<!-- API KEY MODAL -->
+<div class="modal-overlay" id="apiModal">
+  <div class="modal">
+    <h2>⬡ CyberWatch — Configuration</h2>
+    <p>Entre ta clé API Anthropic pour activer l'analyse IA. Elle est stockée uniquement dans ton navigateur (localStorage), jamais envoyée ailleurs.</p>
+    <div class="warning">⚠ Ne partage jamais ta clé publiquement. Révoque-la sur console.anthropic.com si compromise.</div>
+    <input type="password" id="apiKeyInput" placeholder="sk-ant-api03-..." autocomplete="off"/>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="skipApiKey()">Continuer sans IA</button>
+      <button class="btn btn-green" onclick="saveApiKey()">Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<div class="shell">
+  <!-- SIDEBAR NAV -->
+  <div class="sidebar">
+    <div class="logo">⬡</div>
+    <button class="nav-btn active" onclick="nav('veille',this)" title="Veille">
+      <span>◈</span><span class="tooltip">Veille RSS</span>
+    </button>
+    <button class="nav-btn" onclick="nav('analyse',this)" title="Analyse">
+      <span>◎</span><span class="tooltip">Analyse IA</span>
+    </button>
+    <button class="nav-btn" onclick="nav('digest',this)" title="Digest">
+      <span>◇</span><span class="tooltip">Digest</span>
+    </button>
+    <button class="nav-btn" onclick="nav('ioc',this)" title="IOC">
+      <span>◉</span><span class="tooltip">IOCs</span>
+    </button>
+    <button class="nav-btn" onclick="nav('settings',this)" title="Config" style="margin-top:auto">
+      <span>⚙</span><span class="tooltip">Paramètres</span>
+    </button>
+    <div class="dot-live"></div>
+  </div>
+
+  <div class="main">
+    <!-- TOPBAR -->
+    <div class="topbar">
+      <div class="topbar-left">
+        <span class="topbar-title" id="pageTitle">VEILLE RSS</span>
+        <span class="topbar-sub" id="pageSub">Agrégation multi-sources en temps réel</span>
+      </div>
+      <div class="topbar-right">
+        <div class="live-badge"><span></span>LIVE</div>
+        <span id="clock">--:--:--</span>
+        <span style="color:var(--border)">|</span>
+        <span>CyberWatch v2.0</span>
+      </div>
+    </div>
+
+    <!-- PAGE: VEILLE -->
+    <div class="page active" id="page-veille" style="gap:0">
+      <div class="two-col" style="padding:16px;flex:1">
+        <div class="sidebar-panel">
+          <div class="panel-label">Sujets</div>
+          <button class="panel-btn on" data-topic="Ransomware & APT" onclick="toggleTopic(this)">◉ Ransomware & APT</button>
+          <button class="panel-btn" data-topic="Vulnérabilités CVE" onclick="toggleTopic(this)">◈ CVE / Zero-Day</button>
+          <button class="panel-btn" data-topic="NIS2 / DORA" onclick="toggleTopic(this)">◇ NIS2 / DORA</button>
+          <button class="panel-btn" data-topic="IA & Cybersécurité" onclick="toggleTopic(this)">◎ IA & Cyber</button>
+          <button class="panel-btn" data-topic="Threat Intelligence" onclick="toggleTopic(this)">◆ Threat Intel</button>
+          <button class="panel-btn" data-topic="Cloud Security" onclick="toggleTopic(this)">○ Cloud Security</button>
+          <button class="panel-btn" data-topic="Supply Chain" onclick="toggleTopic(this)">▷ Supply Chain</button>
+          <button class="panel-btn" data-topic="Microsoft Sentinel / XDR" onclick="toggleTopic(this)">▶ Sentinel / XDR</button>
+
+          <div class="panel-label">Sévérité</div>
+          <button class="panel-btn on" data-sev="" onclick="setSev(this)">Toutes</button>
+          <button class="panel-btn" data-sev="critical" onclick="setSev(this)"><span style="color:var(--red)">●</span> Critique</button>
+          <button class="panel-btn" data-sev="high" onclick="setSev(this)"><span style="color:var(--amber)">●</span> Élevé</button>
+          <button class="panel-btn" data-sev="medium" onclick="setSev(this)"><span style="color:var(--blue)">●</span> Moyen</button>
+          <button class="panel-btn" data-sev="low" onclick="setSev(this)"><span style="color:var(--t3)">●</span> Faible</button>
+
+          <div class="panel-label">Recherche</div>
+          <input type="text" id="searchInput" placeholder="CVE, groupe, outil..." onkeydown="if(event.key==='Enter')fetchNews()"/>
+          <button class="btn btn-green" style="margin-top:8px;justify-content:center" onclick="fetchNews()" id="btnFetch">◈ Lancer la veille</button>
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:0;overflow:hidden">
+          <div class="sec-header">
+            <span class="sec-title" id="veille-count">Sélectionne des sujets</span>
+            <button class="btn btn-ghost" style="font-size:10px;padding:4px 10px" onclick="fetchNews()" id="btnRefresh" style="display:none">↺ Rafraîchir</button>
+          </div>
+          <div class="content-scroll" id="articleList">
+            <div class="empty"><span>◈</span>Lance la veille pour charger les articles</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PAGE: ANALYSE -->
+    <div class="page" id="page-analyse" style="gap:16px">
+      <div class="stats-row" id="statsRow">
+        <div class="stat"><div class="stat-label">Articles/semaine</div><div class="stat-val" style="color:var(--green)" id="s1">—</div></div>
+        <div class="stat"><div class="stat-label">Menaces critiques</div><div class="stat-val" style="color:var(--red)" id="s2">—</div></div>
+        <div class="stat"><div class="stat-label">CVE zero-day</div><div class="stat-val" style="color:var(--amber)" id="s3">—</div></div>
+        <div class="stat"><div class="stat-label">Groupes actifs</div><div class="stat-val" style="color:var(--purple)" id="s4">—</div></div>
+      </div>
+
+      <div class="card" style="padding:16px;flex:0">
+        <div class="sec-header" style="margin-bottom:12px">
+          <span class="sec-title">Analyse situationnelle</span>
+          <button class="btn btn-green" onclick="generateAnalysis()" id="btnAnalyse">◎ Générer</button>
+        </div>
+        <div class="ai-output" id="analysisOut">Clique sur "Générer" pour une analyse de la menace cyber actuelle.</div>
+      </div>
+
+      <div class="card" style="padding:16px;flex:1">
+        <div class="sec-title" style="margin-bottom:12px">Analyste IA — Questions libres</div>
+        <div style="display:flex;gap:8px;margin-bottom:10px">
+          <input type="text" id="questionInput" placeholder="Ex: Quels secteurs sont les plus ciblés par les APT ?" onkeydown="if(event.key==='Enter')askQuestion()"/>
+          <button class="btn btn-green" onclick="askQuestion()" id="btnAsk" style="white-space:nowrap">Envoyer →</button>
+        </div>
+        <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px">
+          <button class="btn btn-ghost" style="font-size:10px;padding:4px 8px" onclick="quickQ(this)">CVEs critiques à patcher ?</button>
+          <button class="btn btn-ghost" style="font-size:10px;padding:4px 8px" onclick="quickQ(this)">Groupes APT les plus actifs ?</button>
+          <button class="btn btn-ghost" style="font-size:10px;padding:4px 8px" onclick="quickQ(this)">Impact NIS2 pour les entreprises françaises ?</button>
+          <button class="btn btn-ghost" style="font-size:10px;padding:4px 8px" onclick="quickQ(this)">Détecter une attaque supply chain ?</button>
+        </div>
+        <div class="ai-output" id="questionOut" style="min-height:60px">—</div>
+      </div>
+    </div>
+
+    <!-- PAGE: DIGEST -->
+    <div class="page" id="page-digest" style="gap:16px">
+      <div style="display:flex;align-items:center;justify-content:space-between">
+        <div>
+          <p style="font-size:12px;color:var(--t2)">Synthèse hebdomadaire automatique des menaces les plus importantes.</p>
+        </div>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-ghost" onclick="copyDigest()" id="btnCopy" style="display:none">◈ Copier</button>
+          <button class="btn btn-amber" onclick="generateDigest()" id="btnDigest">◇ Générer le digest</button>
+        </div>
+      </div>
+      <div class="card" style="padding:20px;flex:1;overflow-y:auto">
+        <div class="ai-output" id="digestOut" style="background:none;border:none;padding:0;min-height:200px">
+          Clique sur "Générer le digest" pour produire la synthèse de la semaine.
+        </div>
+      </div>
+    </div>
+
+    <!-- PAGE: IOC -->
+    <div class="page" id="page-ioc" style="gap:16px">
+      <div class="card" style="padding:16px;flex:0">
+        <div class="sec-header" style="margin-bottom:10px">
+          <span class="sec-title">Texte à analyser</span>
+          <button class="btn btn-ghost" style="font-size:10px;padding:4px 10px" onclick="loadSample()">Charger exemple</button>
+        </div>
+        <textarea id="iocInput" rows="7" placeholder="Colle ici un article, rapport d'incident, alerte CERT, log SIEM... Claude extraira tous les IOCs automatiquement." style="resize:none"></textarea>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-top:8px">
+          <span id="charCount" style="font-size:10px;color:var(--t3);font-family:'IBM Plex Mono',monospace">0 caractères</span>
+          <button class="btn btn-red" onclick="extractIOCs()" id="btnIOC">◉ Extraire les IOCs</button>
+        </div>
+      </div>
+      <div id="iocResults" style="display:none;flex:1;overflow-y:auto">
+        <div id="iocSummary" style="background:var(--bg2);border:1px solid var(--border);border-left:2px solid var(--red);border-radius:7px;padding:12px 14px;margin-bottom:14px;font-size:13px;line-height:1.6"></div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px" id="iocGrid"></div>
+      </div>
+    </div>
+
+    <!-- PAGE: SETTINGS -->
+    <div class="page" id="page-settings" style="gap:16px;max-width:500px">
+      <div class="card" style="padding:20px">
+        <div class="sec-title" style="margin-bottom:14px">Configuration API</div>
+        <label style="font-size:11px;color:var(--t2);font-family:'IBM Plex Mono',monospace;display:block;margin-bottom:6px">Clé Anthropic</label>
+        <input type="password" id="settingsKey" placeholder="sk-ant-api03-..."/>
+        <p style="font-size:11px;color:var(--t3);margin-top:6px;margin-bottom:14px">Stockée localement dans ton navigateur uniquement.</p>
+        <button class="btn btn-green" onclick="updateKey()">Enregistrer la clé</button>
+        <button class="btn btn-ghost" onclick="clearKey()" style="margin-left:8px">Supprimer</button>
+        <div id="keyStatus" style="margin-top:10px;font-size:11px;font-family:'IBM Plex Mono',monospace"></div>
+      </div>
+      <div class="card" style="padding:20px">
+        <div class="sec-title" style="margin-bottom:14px">Sources RSS actives</div>
+        <div style="display:flex;flex-direction:column;gap:6px;font-size:12px;color:var(--t2);font-family:'IBM Plex Mono',monospace">
+          <div>◈ The Hacker News</div>
+          <div>◈ BleepingComputer</div>
+          <div>◈ CERT-FR</div>
+          <div>◈ SecurityWeek</div>
+          <div>◈ Threatpost</div>
+          <div>◈ CyberSecurityNews</div>
+          <div>◈ Dark Reading</div>
+          <div>◈ SANS ISC</div>
+        </div>
+        <p style="font-size:11px;color:var(--t3);margin-top:10px">Les flux sont récupérés via rss2json.com + corsproxy.io (fallback).</p>
+      </div>
+    </div>
+
+  </div><!-- end main -->
+</div><!-- end shell -->
+
+<script>
+// ─── STATE ───────────────────────────────────────────────────────────────────
+let API_KEY = 'REMPLACE_PAR_TA_CLE'
+let selectedTopics = new Set(['Ransomware & APT'])
+let selectedSev = ''
+let lastArticles = []
+
+// ─── INIT ────────────────────────────────────────────────────────────────────
+window.onload = () => {
+  tick()
+  setInterval(tick, 1000)
+  if (!API_KEY) document.getElementById('apiModal').style.display = 'flex'
+  document.getElementById('iocInput').addEventListener('input', e => {
+    document.getElementById('charCount').textContent = e.target.value.length + ' caractères'
+  })
+}
+
+function tick() {
+  document.getElementById('clock').textContent = new Date().toLocaleTimeString('fr-FR')
+}
+
+// ─── NAV ─────────────────────────────────────────────────────────────────────
+const PAGE_META = {
+  veille:   ['VEILLE RSS', 'Agrégation multi-sources en temps réel'],
+  analyse:  ['ANALYSE IA', 'Analyse situationnelle · Claude Opus'],
+  digest:   ['DIGEST', 'Synthèse hebdomadaire automatique'],
+  ioc:      ['EXTRACTION IOCs', 'IPs · Domaines · Hashes · CVEs · Threat Actors'],
+  settings: ['PARAMÈTRES', 'Configuration de la plateforme'],
+}
+function nav(id, btn) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'))
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'))
+  document.getElementById('page-' + id).classList.add('active')
+  btn.classList.add('active')
+  const [t, s] = PAGE_META[id]
+  document.getElementById('pageTitle').textContent = t
+  document.getElementById('pageSub').textContent = s
+}
+
+// ─── API KEY ─────────────────────────────────────────────────────────────────
+function saveApiKey() {
+  const k = document.getElementById('apiKeyInput').value.trim()
+  if (!k.startsWith('sk-ant-')) return alert('Clé invalide (doit commencer par sk-ant-)')
+  API_KEY = k
+  localStorage.setItem('cw_api_key', k)
+  document.getElementById('apiModal').style.display = 'none'
+}
+function skipApiKey() {
+  document.getElementById('apiModal').style.display = 'none'
+}
+function updateKey() {
+  const k = document.getElementById('settingsKey').value.trim()
+  if (!k) return
+  if (!k.startsWith('sk-ant-')) {
+    document.getElementById('keyStatus').style.color = 'var(--red)'
+    document.getElementById('keyStatus').textContent = '✗ Clé invalide'
+    return
+  }
+  API_KEY = k
+  localStorage.setItem('cw_api_key', k)
+  document.getElementById('keyStatus').style.color = 'var(--green)'
+  document.getElementById('keyStatus').textContent = '✓ Clé enregistrée'
+}
+function clearKey() {
+  API_KEY = ''
+  localStorage.removeItem('cw_api_key')
+  document.getElementById('settingsKey').value = ''
+  document.getElementById('keyStatus').style.color = 'var(--amber)'
+  document.getElementById('keyStatus').textContent = 'Clé supprimée'
+}
+
+// ─── RSS FEEDS ───────────────────────────────────────────────────────────────
+const FEEDS = [
+  { url: 'https://feeds.feedburner.com/TheHackersNews', name: 'The Hacker News' },
+  { url: 'https://www.bleepingcomputer.com/feed/', name: 'BleepingComputer' },
+  { url: 'https://www.cert.ssi.gouv.fr/feed/', name: 'CERT-FR' },
+  { url: 'https://cybersecuritynews.com/feed/', name: 'CyberSecurityNews' },
+  { url: 'https://isc.sans.edu/rssfeed_full.xml', name: 'SANS ISC' },
+  { url: 'https://www.darkreading.com/rss.xml', name: 'Dark Reading' },
+  { url: 'https://threatpost.com/feed/', name: 'Threatpost' },
+  { url: 'https://www.schneier.com/feed/atom/', name: 'Schneier on Security' },
+  { url: 'https://krebsonsecurity.com/feed/', name: 'Krebs on Security' },
+]
+const KEYWORDS = {
+  'Ransomware & APT': ['ransomware','apt','lockbit','clop','alphv','blackcat','ryuk','conti'],
+  'Vulnérabilités CVE': ['cve','vulnerability','zero-day','zero day','exploit','rce','patch'],
+  'NIS2 / DORA': ['nis2','dora','compliance','rgpd','gdpr','conformité','directive'],
+  'IA & Cybersécurité': ['artificial intelligence','machine learning','llm','deepfake','gpt',' ai '],
+  'Threat Intelligence': ['threat intelligence','ioc','indicator','mitre','att&ck','threat actor'],
+  'Cloud Security': ['cloud','aws','azure','gcp','kubernetes','misconfiguration'],
+  'Supply Chain': ['supply chain','npm','pypi','dependency','third-party'],
+  'Microsoft Sentinel / XDR': ['sentinel','xdr','siem','defender','microsoft security'],
+}
+
+async function fetchFeed(feed) {
+  const PROXIES = [
+    url => `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(url)}&count=15&api_key=`,
+    url => `https://corsproxy.io/?${encodeURIComponent(url)}`,
+    url => `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`,
+    url => `https://thingproxy.freeboard.io/fetch/${url}`,
+  ]
+
+  // Essai rss2json en premier (retourne JSON direct)
+  try {
+    const r = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(feed.url)}&count=20`, { signal: AbortSignal.timeout(10000) })
+    const j = await r.json()
+    if (j.status === 'ok' && j.items?.length) {
+      return j.items.map(item => ({
+        title: item.title || '',
+        link: item.link || item.guid || '',
+        pubDate: item.pubDate || '',
+        content: (item.description || item.content || '').replace(/<[^>]*>/g,'').replace(/&[a-z]+;/gi,'').trim().slice(0,400),
+        source: feed.name
+      })).filter(i => i.title)
+    }
+  } catch(e) { console.warn('rss2json failed for', feed.name, e.message) }
+
+  // Fallback : proxies raw XML
+  const rawProxies = [
+    `https://corsproxy.io/?${encodeURIComponent(feed.url)}`,
+    `https://api.allorigins.win/raw?url=${encodeURIComponent(feed.url)}`,
+    `https://thingproxy.freeboard.io/fetch/${feed.url}`,
+  ]
+  for (const proxyUrl of rawProxies) {
+    try {
+      const r = await fetch(proxyUrl, { signal: AbortSignal.timeout(10000) })
+      if (!r.ok) continue
+      const text = await r.text()
+      if (!text || text.length < 100) continue
+      const parser = new DOMParser()
+      const doc = parser.parseFromString(text, 'text/xml')
+      const items = doc.querySelectorAll('item, entry')
+      if (!items.length) continue
+      const out = []
+      items.forEach(item => {
+        const title = item.querySelector('title')?.textContent?.trim() || ''
+        const link = item.querySelector('link')?.textContent?.trim() || item.querySelector('link')?.getAttribute('href') || ''
+        const pubDate = item.querySelector('pubDate, published, updated')?.textContent || ''
+        const desc = (item.querySelector('description, summary, content')?.textContent || '').replace(/<[^>]*>/g,'').replace(/&[a-z]+;/gi,'').trim().slice(0,400)
+        if (title) out.push({ title, link, pubDate, content: desc, source: feed.name })
+      })
+      if (out.length) return out.slice(0, 15)
+    } catch(e) { console.warn('proxy failed', proxyUrl, e.message) }
+  }
+  console.error('All proxies failed for', feed.name)
+  return []
+}
+
+function matchesTopics(item) {
+  if (selectedTopics.size === 0) return true
+  const text = (item.title + ' ' + item.content).toLowerCase()
+  for (const topic of selectedTopics) {
+    const kws = KEYWORDS[topic] || [topic.toLowerCase()]
+    if (kws.some(k => text.includes(k))) return true
+  }
+  return false
+}
+
+function getSeverity(item) {
+  const t = (item.title + ' ' + item.content).toLowerCase()
+  if (/critical|critique|zero.day|actively exploit|ransomware attack|data breach/.test(t)) return 'critical'
+  if (/high|élevé|rce|remote code|privilege escalation|apt|nation.state/.test(t)) return 'high'
+  if (/medium|phishing|malware|vulnerabilit/.test(t)) return 'medium'
+  return 'low'
+}
+
+function getCategory(item) {
+  const t = (item.title + ' ' + item.content).toLowerCase()
+  for (const [cat, kws] of Object.entries(KEYWORDS)) {
+    if (kws.some(k => t.includes(k))) return cat
+  }
+  return 'Général'
+}
+
+const SEV_TAG = {
+  critical: ['tag-red','CRITIQUE'],
+  high: ['tag-amber','ÉLEVÉ'],
+  medium: ['tag-blue','MOYEN'],
+  low: ['tag-gray','FAIBLE'],
+}
+const CAT_TAG = {
+  'Ransomware & APT':'tag-red','Vulnérabilités CVE':'tag-amber','NIS2 / DORA':'tag-blue',
+  'IA & Cybersécurité':'tag-purple','Threat Intelligence':'tag-green','Cloud Security':'tag-green',
+  'Supply Chain':'tag-amber','Microsoft Sentinel / XDR':'tag-blue','Général':'tag-gray'
+}
+
+function timeAgo(dateStr) {
+  try {
+    const d = new Date(dateStr), now = new Date()
+    const diff = Math.floor((now - d) / 60000)
+    if (diff < 1) return 'à l\'instant'
+    if (diff < 60) return `il y a ${diff}min`
+    if (diff < 1440) return `il y a ${Math.floor(diff/60)}h`
+    return `il y a ${Math.floor(diff/1440)}j`
+  } catch { return '' }
+}
+
+async function fetchNews() {
+  const btn = document.getElementById('btnFetch')
+  btn.disabled = true
+  btn.textContent = '◈ Chargement...'
+  document.getElementById('articleList').innerHTML = '<div class="empty"><span style="animation:spin .8s linear infinite;display:inline-block">◈</span>Récupération des flux...</div>'
+
+  const promises = FEEDS.map(f => fetchFeed(f))
+  const results = await Promise.allSettled(promises)
+  let all = []
+  results.forEach(r => { if (r.status === 'fulfilled') all.push(...r.value) })
+
+  const search = document.getElementById('searchInput').value.toLowerCase()
+  all = all.filter(a => matchesTopics(a))
+  if (search) all = all.filter(a => a.title.toLowerCase().includes(search) || a.content.toLowerCase().includes(search))
+
+  all = all.map(a => ({ ...a, severity: getSeverity(a), category: getCategory(a) }))
+  if (selectedSev) all = all.filter(a => a.severity === selectedSev)
+  all.sort((a, b) => new Date(b.pubDate) - new Date(a.pubDate))
+  lastArticles = all
+
+  document.getElementById('veille-count').textContent = `${all.length} article${all.length>1?'s':''} trouvé${all.length>1?'s':''}`
+
+  if (!all.length) {
+    document.getElementById('articleList').innerHTML = '<div class="empty"><span>◈</span>Aucun article pour ces critères</div>'
+  } else {
+    document.getElementById('articleList').innerHTML = all.map(a => {
+      const [sevCls, sevLabel] = SEV_TAG[a.severity]
+      const catCls = CAT_TAG[a.category] || 'tag-gray'
+      return `<div class="article">
+        <div class="article-meta">
+          <span class="tag ${sevCls}">${sevLabel}</span>
+          <span class="tag ${catCls}">${a.category}</span>
+        </div>
+        <div class="article-title"><a href="${a.link}" target="_blank" rel="noopener">${a.title}</a></div>
+        ${a.content ? `<div class="article-snippet">${a.content}</div>` : ''}
+        <div class="article-footer">
+          <span class="article-source">${a.source}</span>
+          <span class="article-date">${timeAgo(a.pubDate)}</span>
+        </div>
+      </div>`
+    }).join('')
+  }
+
+  btn.disabled = false
+  btn.textContent = '◈ Lancer la veille'
+}
+
+// ─── TOPIC / SEV TOGGLE ──────────────────────────────────────────────────────
+function toggleTopic(btn) {
+  const t = btn.dataset.topic
+  if (selectedTopics.has(t)) { selectedTopics.delete(t); btn.classList.remove('on') }
+  else { selectedTopics.add(t); btn.classList.add('on') }
+}
+function setSev(btn) {
+  document.querySelectorAll('[data-sev]').forEach(b => b.classList.remove('on'))
+  btn.classList.add('on')
+  selectedSev = btn.dataset.sev
+}
+
+// ─── CLAUDE API ───────────────────────────────────────────────────────────────
+async function callClaude(prompt, system, outputEl, onDone) {
+  if (!API_KEY) {
+    outputEl.innerHTML = '<span style="color:var(--amber)">⚠ Configure ta clé API dans les paramètres (⚙)</span>'
+    return
+  }
+  if (!API_KEY) {
+    outputEl.innerHTML = '<span style="color:var(--amber)">⚠ Configure ta clé API dans les paramètres (⚙)</span>'
+    return
+  }
+  outputEl.innerHTML = '<span class="cursor"></span>'
+  let full = ''
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': API_KEY,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true',
+      },
+      body: JSON.stringify({
+        model: 'claude-haiku-4-5-20251001',
+        max_tokens: 1500,
+        system: system || 'Tu es un analyste SOC senior expert en cybersécurité. Tu réponds en français, de manière concise et structurée.',
+        messages: [{ role: 'user', content: prompt }],
+        stream: true,
+      })
+    })
+    const reader = res.body.getReader()
+    const dec = new TextDecoder()
+    while (true) {
+      const { done, value } = await reader.read()
+      if (done) break
+      const lines = dec.decode(value).split('\n')
+      for (const line of lines) {
+        if (!line.startsWith('data: ')) continue
+        const data = line.slice(6).trim()
+        if (data === '[DONE]') break
+        try {
+          const j = JSON.parse(data)
+          if (j.type === 'content_block_delta' && j.delta?.text) {
+            full += j.delta.text
+            outputEl.innerHTML = renderMd(full) + '<span class="cursor"></span>'
+          }
+        } catch {}
+      }
+    }
+    outputEl.innerHTML = renderMd(full)
+    if (onDone) onDone(full)
+  } catch (e) {
+    outputEl.innerHTML = `<span style="color:var(--red)">Erreur: ${e.message}</span>`
+  }
+}
+
+function renderMd(text) {
+  return text
+    .replace(/^## (.+)$/gm, '<h2>$1</h2>')
+    .replace(/^### (.+)$/gm, '<h3>$1</h3>')
+    .replace(/^\* (.+)$/gm, '<li>$1</li>')
+    .replace(/^- (.+)$/gm, '<li>$1</li>')
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    .replace(/\n\n/g, '<br/>')
+}
+
+// ─── ANALYSE ─────────────────────────────────────────────────────────────────
+async function generateAnalysis() {
+  const btn = document.getElementById('btnAnalyse')
+  btn.disabled = true; btn.textContent = '◎ Analyse...'
+  const ctx = lastArticles.slice(0,15).map(a => `- [${a.source}] ${a.title}: ${a.content?.slice(0,200)}`).join('\n')
+  await callClaude(
+    `Génère une analyse situationnelle complète de la menace cyber actuelle (mai 2026).
+Couvre: 1) Menaces principales actives 2) Tendances émergentes 3) Secteurs ciblés 4) Recommandations SOC.
+${ctx ? '\nActualités récentes:\n' + ctx : ''}`,
+    null,
+    document.getElementById('analysisOut'),
+    () => { btn.disabled = false; btn.textContent = '◎ Régénérer' }
+  )
+  btn.disabled = false; btn.textContent = '◎ Régénérer'
+
+  // auto stats
+  generateStats()
+}
+
+async function generateStats() {
+  if (!API_KEY) return
+  const ctx = lastArticles.slice(0,20).map(a => `- ${a.severity} | ${a.title}`).join('\n')
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type':'application/json','x-api-key':API_KEY,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true' },
+      body: JSON.stringify({
+        model: 'claude-haiku-4-5-20251001', max_tokens: 300,
+        system: 'Réponds UNIQUEMENT en JSON valide, aucun texte autour.',
+        messages: [{ role:'user', content:`Estime ces stats cyber de la semaine en JSON:
+{"articles_semaine":N,"menaces_critiques":N,"cve_zero_day":N,"groupes_actifs":N}
+Actualités: ${ctx}` }]
+      })
+    })
+    const j = await res.json()
+    const raw = j.content?.[0]?.text || '{}'
+    const data = JSON.parse(raw.replace(/```json\n?/g,'').replace(/```/g,'').trim())
+    if (data.articles_semaine !== undefined) {
+      document.getElementById('s1').textContent = data.articles_semaine
+      document.getElementById('s2').textContent = data.menaces_critiques
+      document.getElementById('s3').textContent = data.cve_zero_day
+      document.getElementById('s4').textContent = data.groupes_actifs
+    }
+  } catch {}
+}
+
+function quickQ(btn) {
+  document.getElementById('questionInput').value = btn.textContent
+  askQuestion()
+}
+
+async function askQuestion() {
+  const q = document.getElementById('questionInput').value.trim()
+  if (!q) return
+  const btn = document.getElementById('btnAsk')
+  btn.disabled = true; btn.textContent = '...'
+  const ctx = lastArticles.slice(0,10).map(a => `- ${a.title} (${a.source})`).join('\n')
+  await callClaude(
+    q + (ctx ? '\n\nActualités disponibles:\n' + ctx : ''),
+    null,
+    document.getElementById('questionOut'),
+    () => { btn.disabled = false; btn.textContent = 'Envoyer →' }
+  )
+  btn.disabled = false; btn.textContent = 'Envoyer →'
+}
+
+// ─── DIGEST ──────────────────────────────────────────────────────────────────
+async function generateDigest() {
+  const btn = document.getElementById('btnDigest')
+  btn.disabled = true; btn.textContent = '◇ Génération...'
+  document.getElementById('btnCopy').style.display = 'none'
+
+  // fetch fresh articles if none
+  if (!lastArticles.length) await fetchNews()
+  const ctx = lastArticles.slice(0,30).map(a =>
+    `[${a.severity.toUpperCase()}][${a.category}] ${a.title} (${a.source}): ${a.content?.slice(0,300)}`
+  ).join('\n')
+
+  await callClaude(
+    `Génère un digest hebdomadaire de veille cybersécurité structuré.
+
+Structure OBLIGATOIRE:
+## 🔴 Menaces critiques cette semaine
+## 🟠 Vulnérabilités à patcher en priorité
+## 🔵 Tendances & Threat Intelligence
+## 🟢 Réglementation & Conformité
+## 💡 Recommandations SOC
+
+Actualités:
+${ctx}`,
+    'Tu es un analyste SOC senior. Tu produis des digests hebdomadaires de veille cyber professionnels, en français, structurés et actionnables.',
+    document.getElementById('digestOut'),
+    () => {
+      document.getElementById('btnCopy').style.display = 'inline-flex'
+      btn.disabled = false; btn.textContent = '◇ Régénérer'
+    }
+  )
+  btn.disabled = false; btn.textContent = '◇ Régénérer'
+}
+
+function copyDigest() {
+  const text = document.getElementById('digestOut').innerText
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = document.getElementById('btnCopy')
+    btn.textContent = '✓ Copié'
+    setTimeout(() => btn.textContent = '◈ Copier', 2000)
+  })
+}
+
+// ─── IOCs ─────────────────────────────────────────────────────────────────────
+function loadSample() {
+  document.getElementById('iocInput').value = `Microsoft a publié un patch d'urgence pour CVE-2024-21413, une vulnérabilité critique (CVSS 9.8) affectant Outlook.
+Le groupe APT29 (Cozy Bear) exploite activement cette faille depuis le domaine malveillant update-microsoft[.]ru (185.220.101.45).
+Les samples malwares identifiés ont les hashes suivants:
+SHA256: a1b2c3d4e5f6789012345678901234567890abcdef1234567890abcdef123456
+MD5: d41d8cd98f00b204e9800998ecf8427e
+L'infrastructure C2 utilise c2-server[.]xyz et exfiltre vers hxxps://data-collect[.]ru/upload.php
+Contact: apt29-ops@protonmail.com`
+  document.getElementById('charCount').textContent = document.getElementById('iocInput').value.length + ' caractères'
+}
+
+async function extractIOCs() {
+  const text = document.getElementById('iocInput').value.trim()
+  if (!text) return
+  if (!API_KEY) {
+    alert('Configure ta clé API dans les paramètres (⚙)')
+    return
+  }
+  if (!API_KEY) { alert('Configure ta clé API dans les paramètres (⚙)'); return }
+  const btn = document.getElementById('btnIOC')
+  btn.disabled = true; btn.textContent = '◉ Extraction...'
+  document.getElementById('iocResults').style.display = 'none'
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type':'application/json','x-api-key':API_KEY,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true' },
+      body: JSON.stringify({
+        model: 'claude-haiku-4-5-20251001', max_tokens: 1500,
+        system: 'Tu es un expert threat intelligence. Tu extrais les IOCs et réponds UNIQUEMENT en JSON valide, sans markdown.',
+        messages: [{ role:'user', content:`Extrais tous les IOCs de ce texte en JSON:
+{"ips":[{"value":"...","context":"..."}],"domains":[{"value":"...","context":"..."}],"hashes":[{"value":"...","type":"MD5|SHA256","context":"..."}],"urls":[{"value":"...","context":"..."}],"emails":[{"value":"...","context":"..."}],"cves":[{"value":"...","severity":"...","context":"..."}],"threat_actors":[{"name":"...","context":"..."}],"malware":[{"name":"...","type":"...","context":"..."}],"summary":"résumé en 2 phrases"}
+
+Texte: ${text.slice(0,4000)}` }]
+      })
+    })
+    const j = await res.json()
+    const raw = j.content?.[0]?.text || '{}'
+    const data = JSON.parse(raw.replace(/```json\n?/g,'').replace(/```/g,'').trim())
+
+    document.getElementById('iocSummary').innerHTML = `<strong style="color:var(--red)">◉ Analyse</strong><br/>${data.summary || '—'}`
+
+    const sections = [
+      { key:'ips', label:'Adresses IP', color:'var(--red)', field:'value' },
+      { key:'domains', label:'Domaines', color:'var(--amber)', field:'value' },
+      { key:'hashes', label:'Hashes', color:'var(--purple)', field:'value' },
+      { key:'urls', label:'URLs', color:'var(--blue)', field:'value' },
+      { key:'cves', label:'CVEs', color:'var(--red)', field:'value' },
+      { key:'emails', label:'Emails', color:'var(--green)', field:'value' },
+      { key:'threat_actors', label:'Threat Actors', color:'var(--red)', field:'name' },
+      { key:'malware', label:'Malware', color:'var(--amber)', field:'name' },
+    ]
+    document.getElementById('iocGrid').innerHTML = sections
+      .filter(s => data[s.key]?.length)
+      .map(s => `<div>
+        <div class="ioc-title" style="color:${s.color}">${s.label} <span class="tag tag-gray">${data[s.key].length}</span></div>
+        ${data[s.key].map(i => `<div class="ioc-item">
+          ${i[s.field] || i.value || i.name}${i.type ? ` <span style="color:var(--t3)">(${i.type})</span>` : ''}${i.severity ? ` <span style="color:var(--red)">[${i.severity}]</span>` : ''}
+          ${i.context ? `<div class="ioc-ctx">${i.context}</div>` : ''}
+        </div>`).join('')}
+      </div>`).join('')
+
+    document.getElementById('iocResults').style.display = 'block'
+  } catch (e) {
+    alert('Erreur extraction: ' + e.message)
+  }
+  btn.disabled = false; btn.textContent = '◉ Extraire les IOCs'
+}
+
+// css spin
+const style = document.createElement('style')
+style.textContent = '@keyframes spin{to{transform:rotate(360deg)}}'
+document.head.appendChild(style)
+</script>
+</body>
+</html>
