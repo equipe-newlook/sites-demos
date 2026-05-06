@@ -1,0 +1,975 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>CyberWatch v3 — Neo-Bank SOC</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg0:#080c18;--bg1:#0d1220;--bg2:#111827;--bg3:#1a2235;
+  --border:#1e2d4a;--border2:#243352;
+  --t1:#dde4f0;--t2:#7a8aaa;--t3:#3a4a6a;
+  --green:#00e87a;--greenbg:#00e87a0d;
+  --red:#ff4455;--redbg:#ff44550d;
+  --amber:#ffaa00;--amberbg:#ffaa000d;
+  --blue:#3b9eff;--bluebg:#3b9eff0d;
+  --purple:#a855f7;--purplebg:#a855f70d;
+  --orange:#ff6b35;--orangebg:#ff6b350d;
+}
+html,body{background:var(--bg0);color:var(--t1);font-family:'IBM Plex Sans',sans-serif;min-height:100vh;-webkit-font-smoothing:antialiased}
+::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:var(--bg0)}::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+::selection{background:#00e87a20;color:var(--green)}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(0,232,122,.02) 1px,transparent 1px),linear-gradient(90deg,rgba(0,232,122,.02) 1px,transparent 1px);background-size:44px 44px;pointer-events:none;z-index:0}
+
+.shell{display:flex;min-height:100vh;position:relative;z-index:1}
+.sidebar{width:56px;background:var(--bg1);border-right:1px solid var(--border);display:flex;flex-direction:column;align-items:center;padding:16px 0;position:fixed;top:0;left:0;height:100vh;z-index:100}
+.logo{color:var(--green);font-size:20px;margin-bottom:24px;cursor:default}
+.nav-btn{width:40px;height:40px;border:none;background:none;color:var(--t3);cursor:pointer;border-radius:6px;font-size:16px;display:flex;align-items:center;justify-content:center;margin:2px 0;transition:all .15s;position:relative;flex-direction:column;gap:2px}
+.nav-btn:hover{color:var(--t2);background:var(--bg3)}
+.nav-btn.active{color:var(--green);background:var(--greenbg)}
+.nav-lbl{font-size:8px;font-family:'IBM Plex Mono',monospace;letter-spacing:.05em}
+.nav-btn .tip{position:absolute;left:52px;background:var(--bg2);border:1px solid var(--border);color:var(--t1);font-size:11px;font-family:'IBM Plex Mono',monospace;padding:4px 8px;border-radius:4px;white-space:nowrap;pointer-events:none;opacity:0;transition:opacity .15s;z-index:200}
+.nav-btn:hover .tip{opacity:1}
+.dot-live{width:6px;height:6px;border-radius:50%;background:var(--green);margin-top:auto;margin-bottom:8px;animation:pulse 2.5s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1;box-shadow:0 0 0 0 #00e87a40}50%{opacity:.6;box-shadow:0 0 0 4px #00e87a00}}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+
+.main{margin-left:56px;flex:1;display:flex;flex-direction:column;min-height:100vh}
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:10px 20px;border-bottom:1px solid var(--border);background:var(--bg1);position:sticky;top:0;z-index:50}
+.topbar-title{font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:600;letter-spacing:.08em}
+.topbar-sub{font-size:11px;color:var(--t3);font-family:'IBM Plex Mono',monospace;margin-left:10px}
+.topbar-right{display:flex;align-items:center;gap:10px;font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--t3)}
+.live-badge{display:flex;align-items:center;gap:5px;color:var(--green);font-size:10px}
+.live-badge span{width:5px;height:5px;border-radius:50%;background:var(--green);animation:pulse 2s infinite}
+
+.page{display:none;flex:1;padding:18px;flex-direction:column;gap:14px;animation:fadeIn .25s ease-out}
+.page.active{display:flex}
+
+/* Cards */
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:8px;position:relative;overflow:hidden}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,#00e87a18,transparent)}
+
+/* Buttons */
+.btn{padding:7px 14px;border-radius:5px;font-family:'IBM Plex Mono',monospace;font-size:11px;cursor:pointer;border:1px solid;transition:all .15s;display:inline-flex;align-items:center;gap:5px}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.btn-green{background:var(--greenbg);border-color:#00e87a40;color:var(--green)}
+.btn-green:hover:not(:disabled){background:#00e87a18}
+.btn-red{background:var(--redbg);border-color:#ff445540;color:var(--red)}
+.btn-amber{background:var(--amberbg);border-color:#ffaa0040;color:var(--amber)}
+.btn-blue{background:var(--bluebg);border-color:#3b9eff40;color:var(--blue)}
+.btn-ghost{background:none;border-color:var(--border);color:var(--t2)}
+.btn-ghost:hover{color:var(--t1);border-color:var(--border2)}
+
+/* Inputs */
+input,textarea,select{background:var(--bg1);border:1px solid var(--border);color:var(--t1);border-radius:5px;font-family:'IBM Plex Mono',monospace;font-size:12px;padding:7px 10px;outline:none;transition:border-color .15s;width:100%}
+input:focus,textarea:focus,select:focus{border-color:#00e87a50;box-shadow:0 0 0 2px #00e87a08}
+select option{background:var(--bg2)}
+
+/* Tags */
+.tag{font-size:10px;padding:2px 7px;border-radius:12px;font-family:'IBM Plex Mono',monospace;border:1px solid;white-space:nowrap}
+.tag-red{color:var(--red);background:var(--redbg);border-color:#ff445525}
+.tag-amber{color:var(--amber);background:var(--amberbg);border-color:#ffaa0025}
+.tag-blue{color:var(--blue);background:var(--bluebg);border-color:#3b9eff25}
+.tag-green{color:var(--green);background:var(--greenbg);border-color:#00e87a25}
+.tag-purple{color:var(--purple);background:var(--purplebg);border-color:#a855f725}
+.tag-orange{color:var(--orange);background:var(--orangebg);border-color:#ff6b3525}
+.tag-gray{color:var(--t2);background:var(--bg3);border-color:var(--border)}
+
+/* Score badge */
+.score-badge{display:inline-flex;align-items:center;justify-content:center;width:38px;height:38px;border-radius:6px;font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:600;border:1px solid;flex-shrink:0}
+.score-crit{background:var(--redbg);border-color:#ff445540;color:var(--red)}
+.score-high{background:var(--amberbg);border-color:#ffaa0040;color:var(--amber)}
+.score-med{background:var(--bluebg);border-color:#3b9eff40;color:var(--blue)}
+.score-low{background:var(--bg3);border-color:var(--border);color:var(--t2)}
+
+/* Article */
+.article{background:var(--bg2);border:1px solid var(--border);border-radius:7px;padding:12px 14px;transition:border-color .15s;display:flex;gap:12px;align-items:flex-start}
+.article:hover{border-color:var(--border2)}
+.article-body{flex:1;min-width:0}
+.article-meta{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:6px}
+.article-title{font-size:13px;font-weight:500;color:var(--t1);line-height:1.4;margin-bottom:4px}
+.article-title a{color:inherit;text-decoration:none}
+.article-title a:hover{color:var(--green)}
+.article-snippet{font-size:11px;color:var(--t2);line-height:1.6;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.article-footer{margin-top:8px;display:flex;align-items:center;gap:8px}
+.article-src{font-size:10px;font-family:'IBM Plex Mono',monospace;color:var(--t3)}
+.article-date{font-size:10px;font-family:'IBM Plex Mono',monospace;color:var(--t3);margin-left:auto}
+
+/* Two col layout */
+.two-col{display:grid;grid-template-columns:200px 1fr;gap:14px;flex:1;min-height:0}
+.panel{display:flex;flex-direction:column;gap:3px}
+.panel-lbl{font-size:10px;font-family:'IBM Plex Mono',monospace;color:var(--t3);text-transform:uppercase;letter-spacing:.06em;margin:10px 0 5px;padding-left:4px}
+.panel-btn{padding:6px 10px;border-radius:5px;font-size:11px;font-family:'IBM Plex Mono',monospace;cursor:pointer;border:1px solid transparent;color:var(--t2);background:none;text-align:left;transition:all .15s;display:flex;align-items:center;gap:6px;white-space:nowrap}
+.panel-btn:hover{color:var(--t1);background:var(--bg3)}
+.panel-btn.on{background:var(--greenbg);border-color:#00e87a30;color:var(--green)}
+
+/* Stats */
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px}
+.stat{background:var(--bg2);border:1px solid var(--border);border-radius:7px;padding:12px}
+.stat-lbl{font-size:10px;font-family:'IBM Plex Mono',monospace;color:var(--t3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px}
+.stat-val{font-size:22px;font-family:'IBM Plex Mono',monospace;font-weight:600}
+.stat-sub{font-size:10px;color:var(--t3);margin-top:3px;font-family:'IBM Plex Mono',monospace}
+
+/* AI output */
+.ai-out{background:var(--bg1);border:1px solid var(--border);border-radius:6px;padding:14px;font-size:13px;line-height:1.75;color:var(--t1);min-height:60px;font-family:'IBM Plex Sans',sans-serif}
+.ai-out h2{font-size:12px;font-family:'IBM Plex Mono',monospace;font-weight:600;color:var(--green);margin:10px 0 5px}
+.ai-out h3{font-size:11px;font-family:'IBM Plex Mono',monospace;color:var(--blue);margin:8px 0 4px}
+.ai-out li{margin-left:16px;margin-bottom:2px;color:var(--t2);font-size:12px}
+.ai-out strong{color:var(--t1);font-weight:500}
+.cursor::after{content:'█';color:var(--green);animation:blink 1s step-end infinite;font-size:.8em}
+
+/* Scrollable */
+.scroll{flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:8px;min-height:0}
+.empty{display:flex;align-items:center;justify-content:center;flex:1;color:var(--t3);font-size:12px;font-family:'IBM Plex Mono',monospace;text-align:center;padding:40px;flex-direction:column;gap:8px}
+
+/* Notif toast */
+#toast{position:fixed;bottom:20px;right:20px;z-index:9999;display:flex;flex-direction:column;gap:8px}
+.toast-item{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:12px 16px;font-size:12px;font-family:'IBM Plex Mono',monospace;color:var(--t1);max-width:320px;animation:fadeIn .3s ease-out;border-left:3px solid var(--green)}
+.toast-crit{border-left-color:var(--red)}
+
+/* Discord status */
+.discord-dot{width:8px;height:8px;border-radius:50%;background:var(--t3);display:inline-block}
+.discord-dot.ok{background:var(--green)}
+.discord-dot.err{background:var(--red)}
+
+/* Progress bar */
+.progress{height:3px;background:var(--bg3);border-radius:2px;overflow:hidden;margin-top:4px}
+.progress-bar{height:100%;border-radius:2px;transition:width .3s}
+
+/* Chart bars */
+.chart-bar-wrap{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.chart-bar-label{font-size:11px;font-family:'IBM Plex Mono',monospace;color:var(--t2);width:120px;text-overflow:ellipsis;overflow:hidden;white-space:nowrap;flex-shrink:0}
+.chart-bar-bg{flex:1;height:16px;background:var(--bg3);border-radius:3px;overflow:hidden}
+.chart-bar-fill{height:100%;border-radius:3px;transition:width .5s;display:flex;align-items:center;padding-left:6px;font-size:10px;font-family:'IBM Plex Mono',monospace;color:#fff;min-width:20px}
+
+/* IOC */
+.ioc-item{background:var(--bg1);border:1px solid var(--border);border-radius:5px;padding:7px 10px;margin-bottom:3px;font-size:11px;font-family:'IBM Plex Mono',monospace;color:var(--t1)}
+.ioc-ctx{font-size:10px;color:var(--t2);font-family:'IBM Plex Sans',sans-serif;margin-top:2px}
+
+/* Modal */
+.modal-overlay{position:fixed;inset:0;background:#00000090;z-index:1000;display:flex;align-items:center;justify-content:center}
+.modal{background:var(--bg2);border:1px solid var(--border2);border-radius:10px;padding:24px;width:460px;max-width:90vw}
+.modal h2{font-family:'IBM Plex Mono',monospace;font-size:14px;margin-bottom:8px}
+.modal p{font-size:12px;color:var(--t2);margin-bottom:16px;line-height:1.6}
+.warn{background:#ffaa000d;border:1px solid #ffaa0030;border-radius:5px;padding:8px 12px;font-size:11px;color:var(--amber);margin-bottom:14px}
+
+/* Sec header */
+.sh{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.sh-title{font-size:11px;font-family:'IBM Plex Mono',monospace;color:var(--t3);text-transform:uppercase;letter-spacing:.07em}
+
+@media(max-width:640px){.two-col{grid-template-columns:1fr}.stats-grid{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+
+<!-- MODAL CLÉ API -->
+<div class="modal-overlay" id="apiModal">
+  <div class="modal">
+    <h2>⬡ CyberWatch v3 — Neo-Bank SOC</h2>
+    <p>Entre ta clé API Anthropic pour activer l'analyse IA. Stockée dans ton navigateur uniquement.</p>
+    <div class="warn">⚠ Ne partage jamais ta clé. Révoque-la sur console.anthropic.com si compromise.</div>
+    <input type="password" id="apiKeyInput" placeholder="sk-ant-api03-..." autocomplete="off" style="margin-bottom:12px"/>
+    <div style="display:flex;gap:8px;justify-content:flex-end">
+      <button class="btn btn-ghost" onclick="skipKey()">Sans IA</button>
+      <button class="btn btn-green" onclick="saveKey()">Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<div class="shell">
+  <div class="sidebar">
+    <div class="logo">⬡</div>
+    <button class="nav-btn active" onclick="nav('veille',this)"><span>◈</span><span class="nav-lbl">VEILLE</span><span class="tip">Veille RSS</span></button>
+    <button class="nav-btn" onclick="nav('dashboard',this)"><span>◎</span><span class="nav-lbl">KPI</span><span class="tip">Dashboard</span></button>
+    <button class="nav-btn" onclick="nav('analyse',this)"><span>◆</span><span class="nav-lbl">IA</span><span class="tip">Analyse IA</span></button>
+    <button class="nav-btn" onclick="nav('digest',this)"><span>◇</span><span class="nav-lbl">DIGEST</span><span class="tip">Digest</span></button>
+    <button class="nav-btn" onclick="nav('ioc',this)"><span>◉</span><span class="nav-lbl">IOC</span><span class="tip">IOCs</span></button>
+    <button class="nav-btn" onclick="nav('settings',this)" style="margin-top:auto"><span>⚙</span><span class="nav-lbl">CFG</span><span class="tip">Config</span></button>
+    <div class="dot-live"></div>
+  </div>
+
+  <div class="main">
+    <div class="topbar">
+      <div style="display:flex;align-items:center">
+        <span class="topbar-title" id="pageTitle">VEILLE RSS</span>
+        <span class="topbar-sub" id="pageSub">Agrégation multi-sources · NeoBank SOC</span>
+      </div>
+      <div class="topbar-right">
+        <span class="discord-dot" id="discordDot"></span>
+        <span id="discordStatus" style="font-size:10px">Discord</span>
+        <span style="color:var(--border)">|</span>
+        <div class="live-badge"><span></span>LIVE</div>
+        <span id="clock">--:--:--</span>
+        <span style="color:var(--border)">|</span>
+        <span>v3.0</span>
+      </div>
+    </div>
+
+    <!-- PAGE VEILLE -->
+    <div class="page active" id="page-veille" style="gap:0;padding:0">
+      <div class="two-col" style="padding:14px;flex:1;min-height:0">
+        <div class="panel" style="overflow-y:auto">
+          <div class="panel-lbl">Sources</div>
+          <button class="panel-btn on" data-src="all" onclick="setSrc(this)">◈ Toutes</button>
+          <button class="panel-btn" data-src="CERT-FR" onclick="setSrc(this)">🇫🇷 CERT-FR</button>
+          <button class="panel-btn" data-src="CISA KEV" onclick="setSrc(this)">🇺🇸 CISA KEV</button>
+          <button class="panel-btn" data-src="The Hacker News" onclick="setSrc(this)">◈ Hacker News</button>
+          <button class="panel-btn" data-src="BleepingComputer" onclick="setSrc(this)">◈ BleepingComputer</button>
+          <button class="panel-btn" data-src="Krebs on Security" onclick="setSrc(this)">◈ Krebs</button>
+          <button class="panel-btn" data-src="Dark Reading" onclick="setSrc(this)">◈ Dark Reading</button>
+          <button class="panel-btn" data-src="SANS ISC" onclick="setSrc(this)">◈ SANS ISC</button>
+          <button class="panel-btn" data-src="abuse.ch" onclick="setSrc(this)">◉ abuse.ch</button>
+
+          <div class="panel-lbl">Sujets</div>
+          <button class="panel-btn on" data-topic="all" onclick="setTopic(this)">Tous</button>
+          <button class="panel-btn" data-topic="Ransomware & APT" onclick="setTopic(this)">Ransomware & APT</button>
+          <button class="panel-btn" data-topic="Vulnérabilités CVE" onclick="setTopic(this)">CVE / Zero-Day</button>
+          <button class="panel-btn" data-topic="NIS2 / DORA" onclick="setTopic(this)">NIS2 / DORA</button>
+          <button class="panel-btn" data-topic="Cloud Security" onclick="setTopic(this)">Cloud / Azure</button>
+          <button class="panel-btn" data-topic="Active Directory" onclick="setTopic(this)">Active Directory</button>
+          <button class="panel-btn" data-topic="Fortinet" onclick="setTopic(this)">Fortinet / VPN</button>
+
+          <div class="panel-lbl">Score min.</div>
+          <button class="panel-btn on" data-score="0" onclick="setScore(this)">Tous</button>
+          <button class="panel-btn" data-score="7" onclick="setScore(this)"><span style="color:var(--red)">●</span> Critique (≥7)</button>
+          <button class="panel-btn" data-score="5" onclick="setScore(this)"><span style="color:var(--amber)">●</span> Important (≥5)</button>
+
+          <div style="margin-top:12px">
+            <button class="btn btn-green" style="width:100%;justify-content:center" onclick="fetchAll()" id="btnFetch">◈ Lancer la veille</button>
+          </div>
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:8px;min-height:0">
+          <div class="sh">
+            <span class="sh-title" id="veilleCount">En attente</span>
+            <div style="display:flex;gap:6px">
+              <input type="text" id="searchInput" placeholder="Rechercher..." style="width:180px;font-size:11px" onkeydown="if(event.key==='Enter')applyFilters()"/>
+              <button class="btn btn-ghost" onclick="applyFilters()" style="padding:5px 10px">↺</button>
+            </div>
+          </div>
+          <div class="scroll" id="articleList">
+            <div class="empty"><span>◈</span>Lance la veille pour charger les alertes</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PAGE DASHBOARD -->
+    <div class="page" id="page-dashboard">
+      <div class="stats-grid" id="kpiGrid">
+        <div class="stat"><div class="stat-lbl">Alertes critiques 7j</div><div class="stat-val" style="color:var(--red)" id="k1">—</div><div class="stat-sub" id="k1s"></div></div>
+        <div class="stat"><div class="stat-lbl">Alertes importantes 7j</div><div class="stat-val" style="color:var(--amber)" id="k2">—</div></div>
+        <div class="stat"><div class="stat-lbl">Total articles</div><div class="stat-val" style="color:var(--blue)" id="k3">—</div></div>
+        <div class="stat"><div class="stat-lbl">Sources actives</div><div class="stat-val" style="color:var(--green)" id="k4">—</div></div>
+        <div class="stat"><div class="stat-lbl">Score moyen</div><div class="stat-val" style="color:var(--purple)" id="k5">—</div></div>
+        <div class="stat"><div class="stat-lbl">Discord envoyés</div><div class="stat-val" style="color:var(--green)" id="k6">—</div></div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+        <div class="card" style="padding:14px">
+          <div class="sh-title" style="margin-bottom:12px">Top technologies concernées</div>
+          <div id="techChart"></div>
+        </div>
+        <div class="card" style="padding:14px">
+          <div class="sh-title" style="margin-bottom:12px">Top sources d'alerte</div>
+          <div id="srcChart"></div>
+        </div>
+      </div>
+
+      <div class="card" style="padding:14px">
+        <div class="sh-title" style="margin-bottom:12px">Dernières alertes critiques</div>
+        <div id="lastCritical" style="display:flex;flex-direction:column;gap:6px"></div>
+      </div>
+    </div>
+
+    <!-- PAGE ANALYSE IA -->
+    <div class="page" id="page-analyse">
+      <div class="card" style="padding:14px">
+        <div class="sh">
+          <span class="sh-title">Analyse situationnelle NeoBank</span>
+          <button class="btn btn-green" onclick="genAnalysis()" id="btnAnalyse">◎ Générer</button>
+        </div>
+        <div class="ai-out" id="analysisOut">Clique sur Générer pour une analyse contextuelle NeoBank.</div>
+      </div>
+      <div class="card" style="padding:14px;flex:1">
+        <div class="sh-title" style="margin-bottom:10px">Questions à l'analyste SOC</div>
+        <div style="display:flex;gap:8px;margin-bottom:10px">
+          <input type="text" id="qInput" placeholder="Ex: Notre AD est-il exposé aux menaces détectées ?" onkeydown="if(event.key==='Enter')askQ()"/>
+          <button class="btn btn-green" onclick="askQ()" id="btnAsk" style="white-space:nowrap">→</button>
+        </div>
+        <div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:12px">
+          <button class="btn btn-ghost" style="font-size:10px;padding:3px 8px" onclick="quickQ(this)">Menaces critiques pour NeoBank ?</button>
+          <button class="btn btn-ghost" style="font-size:10px;padding:3px 8px" onclick="quickQ(this)">CVEs affectant Windows Server/AD ?</button>
+          <button class="btn btn-ghost" style="font-size:10px;padding:3px 8px" onclick="quickQ(this)">Impact NIS2/DORA sur banques françaises ?</button>
+          <button class="btn btn-ghost" style="font-size:10px;padding:3px 8px" onclick="quickQ(this)">Recommandations SOC urgentes ?</button>
+        </div>
+        <div class="ai-out" id="qOut" style="min-height:60px">—</div>
+      </div>
+    </div>
+
+    <!-- PAGE DIGEST -->
+    <div class="page" id="page-digest">
+      <div style="display:flex;align-items:center;justify-content:space-between">
+        <p style="font-size:12px;color:var(--t2)">Digest de veille hebdomadaire NeoBank — généré par IA</p>
+        <div style="display:flex;gap:6px">
+          <button class="btn btn-ghost" onclick="copyDigest()" id="btnCopy" style="display:none">◈ Copier</button>
+          <button class="btn btn-amber" onclick="genDigest()" id="btnDigest">◇ Générer</button>
+        </div>
+      </div>
+      <div class="card" style="padding:20px;flex:1;overflow-y:auto">
+        <div class="ai-out" id="digestOut" style="background:none;border:none;padding:0;min-height:200px">Lance la veille puis génère le digest.</div>
+      </div>
+    </div>
+
+    <!-- PAGE IOC -->
+    <div class="page" id="page-ioc">
+      <div class="card" style="padding:14px">
+        <div class="sh">
+          <span class="sh-title">Extraction IOCs</span>
+          <button class="btn btn-ghost" style="font-size:10px;padding:4px 8px" onclick="loadSample()">Exemple</button>
+        </div>
+        <textarea id="iocInput" rows="6" placeholder="Colle un article, rapport d'incident, alerte CERT..." style="resize:none"></textarea>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-top:8px">
+          <span id="charCount" style="font-size:10px;color:var(--t3);font-family:'IBM Plex Mono',monospace">0 car.</span>
+          <button class="btn btn-red" onclick="extractIOCs()" id="btnIOC">◉ Extraire</button>
+        </div>
+      </div>
+      <div id="iocResults" style="display:none;flex:1;overflow-y:auto">
+        <div id="iocSummary" style="background:var(--bg2);border:1px solid var(--border);border-left:2px solid var(--red);border-radius:7px;padding:10px 14px;margin-bottom:12px;font-size:12px;line-height:1.6"></div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:10px" id="iocGrid"></div>
+      </div>
+    </div>
+
+    <!-- PAGE SETTINGS -->
+    <div class="page" id="page-settings" style="max-width:520px;gap:12px">
+      <div class="card" style="padding:16px">
+        <div class="sh-title" style="margin-bottom:12px">Clé API Anthropic</div>
+        <input type="password" id="settingsKey" placeholder="sk-ant-api03-..." style="margin-bottom:8px"/>
+        <p style="font-size:11px;color:var(--t3);margin-bottom:12px">Stockée dans ton navigateur (localStorage).</p>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-green" onclick="updateKey()">Enregistrer</button>
+          <button class="btn btn-ghost" onclick="clearKey()">Supprimer</button>
+        </div>
+        <div id="keyStatus" style="margin-top:8px;font-size:11px;font-family:'IBM Plex Mono',monospace"></div>
+      </div>
+      <div class="card" style="padding:16px">
+        <div class="sh-title" style="margin-bottom:12px">Discord Webhook</div>
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+          <span class="discord-dot ok"></span>
+          <span style="font-size:11px;font-family:'IBM Plex Mono',monospace;color:var(--green)">Configuré — #cyberwatch Neo-Bank</span>
+        </div>
+        <button class="btn btn-ghost" style="font-size:11px" onclick="testDiscord()">Tester le webhook</button>
+      </div>
+      <div class="card" style="padding:16px">
+        <div class="sh-title" style="margin-bottom:12px">SI NeoBank — Inventaire cible</div>
+        <div style="font-size:11px;color:var(--t2);font-family:'IBM Plex Mono',monospace;line-height:2">
+          Windows Server · Active Directory · Exchange<br/>
+          Fortinet VPN · Cisco ASA · Citrix<br/>
+          Microsoft 365 · Azure AD<br/>
+          Temenos · Sopra Banking<br/>
+          NIS2 · DORA · RGPD
+        </div>
+      </div>
+      <div class="card" style="padding:16px">
+        <div class="sh-title" style="margin-bottom:10px">Données stockées</div>
+        <div style="font-size:11px;color:var(--t2);font-family:'IBM Plex Mono',monospace;margin-bottom:10px" id="storageInfo">—</div>
+        <button class="btn btn-ghost" style="font-size:11px;color:var(--red);border-color:#ff445530" onclick="clearStorage()">Vider le cache local</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════════════════
+// CONFIG
+// ══════════════════════════════════════════════════════════
+const DISCORD_WEBHOOK = 'https://discord.com/api/webhooks/1501512312081612880/026Yu56KRGyjeAd6JGO3j35LU4o0CJpTI4YLNVvdJTvEf8u2JC5zigL_t7jzx3DBeuOZ'
+
+let API_KEY = localStorage.getItem('cw_api_key') || ''
+let allArticles = JSON.parse(localStorage.getItem('cw_articles') || '[]')
+let discordSent = JSON.parse(localStorage.getItem('cw_discord_sent') || '[]')
+let discordCount = parseInt(localStorage.getItem('cw_discord_count') || '0')
+let filterSrc = 'all', filterTopic = 'all', filterScore = 0
+
+// ══════════════════════════════════════════════════════════
+// SI NEOBANK — inventaire pour scoring pertinence
+// ══════════════════════════════════════════════════════════
+const SI_NEOBANK = {
+  'windows server': 10, 'active directory': 10, 'exchange': 9,
+  'fortinet': 10, 'fortigate': 10, 'fortivpn': 10, 'forti': 9,
+  'cisco asa': 9, 'cisco': 7, 'citrix': 9, 'netscaler': 9,
+  'microsoft 365': 8, 'm365': 8, 'office 365': 8, 'azure ad': 9,
+  'azure': 8, 'entra': 8, 'temenos': 10, 'sopra': 10,
+  'kerberos': 9, 'ldap': 8, 'ntlm': 8, 'smb': 8, 'rdp': 9,
+  'lsass': 9, 'mimikatz': 8, 'pass-the-hash': 9,
+  'ransomware': 9, 'lockbit': 9, 'clop': 8, 'blackcat': 8,
+  'nis2': 8, 'dora': 8, 'rgpd': 7, 'pci': 7,
+  'banking': 8, 'swift': 9, 'sepa': 7,
+}
+
+const SOURCE_CRIT = {
+  'CERT-FR': 10, 'CISA KEV': 10, 'abuse.ch': 9,
+  'Krebs on Security': 8, 'SANS ISC': 8,
+  'BleepingComputer': 7, 'The Hacker News': 7,
+  'Dark Reading': 6, 'Threatpost': 6, 'Schneier on Security': 7,
+}
+
+const TOPIC_MAP = {
+  'Ransomware & APT': ['ransomware','apt','lockbit','clop','alphv','blackcat','ryuk','conti','play ransomware'],
+  'Vulnérabilités CVE': ['cve','vulnerability','zero-day','zero day','exploit','rce','patch tuesday','poc'],
+  'NIS2 / DORA': ['nis2','dora','compliance','rgpd','gdpr','conformité','directive','régulation'],
+  'Cloud Security': ['cloud','aws','azure','gcp','kubernetes','misconfiguration','s3'],
+  'Active Directory': ['active directory','kerberos','ldap','ntlm','lsass','domain controller','dc'],
+  'Fortinet': ['fortinet','fortigate','forti','ssl-vpn','fortivpn'],
+}
+
+// ══════════════════════════════════════════════════════════
+// SCORING MÉTIER
+// ══════════════════════════════════════════════════════════
+function computeScore(article) {
+  const text = (article.title + ' ' + article.content).toLowerCase()
+
+  // CVSS (0-10) depuis le texte
+  let cvss = 0
+  const cvssMatch = text.match(/cvss[:\s]+([0-9]\.[0-9])/i)
+  if (cvssMatch) cvss = parseFloat(cvssMatch[1])
+  else if (/critical/i.test(text)) cvss = 9
+  else if (/high/i.test(text)) cvss = 7
+  else if (/medium/i.test(text)) cvss = 5
+  else cvss = 3
+
+  // Pertinence SI NeoBank (0-10)
+  let siScore = 0, siMatches = []
+  for (const [kw, score] of Object.entries(SI_NEOBANK)) {
+    if (text.includes(kw)) { siScore = Math.max(siScore, score); siMatches.push(kw) }
+  }
+
+  // Criticité source (0-10)
+  const srcScore = SOURCE_CRIT[article.source] || 5
+
+  // Fraîcheur (0-10) — décroît sur 7 jours
+  const ageH = (Date.now() - new Date(article.pubDate).getTime()) / 3600000
+  const freshness = Math.max(0, 10 - (ageH / 16.8))
+
+  // Formule finale
+  const final = (cvss * 0.4) + (siScore * 0.3) + (srcScore * 0.2) + (freshness * 0.1)
+  const rounded = Math.round(final * 10) / 10
+
+  return { score: rounded, cvss, siScore, srcScore, freshness: Math.round(freshness * 10) / 10, siMatches }
+}
+
+function getLevel(score) {
+  if (score >= 7) return 'critical'
+  if (score >= 5) return 'high'
+  if (score >= 3) return 'medium'
+  return 'low'
+}
+
+function getCategory(item) {
+  const t = (item.title + ' ' + item.content).toLowerCase()
+  for (const [cat, kws] of Object.entries(TOPIC_MAP)) {
+    if (kws.some(k => t.includes(k))) return cat
+  }
+  return 'Général'
+}
+
+// ══════════════════════════════════════════════════════════
+// SOURCES RSS
+// ══════════════════════════════════════════════════════════
+const FEEDS = [
+  { url: 'https://feeds.feedburner.com/TheHackersNews', name: 'The Hacker News' },
+  { url: 'https://www.bleepingcomputer.com/feed/', name: 'BleepingComputer' },
+  { url: 'https://www.cert.ssi.gouv.fr/feed/', name: 'CERT-FR' },
+  { url: 'https://isc.sans.edu/rssfeed_full.xml', name: 'SANS ISC' },
+  { url: 'https://www.darkreading.com/rss.xml', name: 'Dark Reading' },
+  { url: 'https://krebsonsecurity.com/feed/', name: 'Krebs on Security' },
+  { url: 'https://threatpost.com/feed/', name: 'Threatpost' },
+  { url: 'https://www.schneier.com/feed/atom/', name: 'Schneier on Security' },
+]
+
+async function fetchFeed(feed) {
+  try {
+    const r = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(feed.url)}&count=20`, { signal: AbortSignal.timeout(10000) })
+    const j = await r.json()
+    if (j.status === 'ok' && j.items?.length) {
+      return j.items.map(item => ({
+        title: item.title || '',
+        link: item.link || item.guid || '',
+        pubDate: item.pubDate || new Date().toISOString(),
+        content: (item.description || item.content || '').replace(/<[^>]*>/g,'').replace(/&[a-z]+;/gi,' ').trim().slice(0,500),
+        source: feed.name,
+        id: btoa(encodeURIComponent(item.link || item.title || '')).slice(0,20),
+      })).filter(i => i.title)
+    }
+  } catch(e) { console.warn('rss2json:', feed.name, e.message) }
+
+  // fallback
+  for (const proxy of [
+    `https://corsproxy.io/?${encodeURIComponent(feed.url)}`,
+    `https://api.allorigins.win/raw?url=${encodeURIComponent(feed.url)}`,
+  ]) {
+    try {
+      const r = await fetch(proxy, { signal: AbortSignal.timeout(10000) })
+      if (!r.ok) continue
+      const text = await r.text()
+      const doc = new DOMParser().parseFromString(text, 'text/xml')
+      const items = doc.querySelectorAll('item, entry')
+      if (!items.length) continue
+      const out = []
+      items.forEach(item => {
+        const title = item.querySelector('title')?.textContent?.trim() || ''
+        const link = item.querySelector('link')?.textContent?.trim() || item.querySelector('link')?.getAttribute('href') || ''
+        const pubDate = item.querySelector('pubDate,published,updated')?.textContent || new Date().toISOString()
+        const desc = (item.querySelector('description,summary,content')?.textContent||'').replace(/<[^>]*>/g,'').trim().slice(0,500)
+        if (title) out.push({ title, link, pubDate, content: desc, source: feed.name, id: btoa(encodeURIComponent(link||title)).slice(0,20) })
+      })
+      if (out.length) return out.slice(0,20)
+    } catch {}
+  }
+  return []
+}
+
+async function fetchCISA() {
+  try {
+    // CISA KEV via proxy (JSON public)
+    const r = await fetch('https://corsproxy.io/?' + encodeURIComponent('https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json'), { signal: AbortSignal.timeout(12000) })
+    const j = await r.json()
+    const vulns = (j.vulnerabilities || []).slice(0, 15)
+    return vulns.map(v => ({
+      title: `[CISA KEV] ${v.cveID} — ${v.vulnerabilityName}`,
+      link: `https://www.cisa.gov/known-exploited-vulnerabilities-catalog`,
+      pubDate: v.dateAdded ? new Date(v.dateAdded).toISOString() : new Date().toISOString(),
+      content: `Produit: ${v.product} (${v.vendorProject}). ${v.shortDescription || ''} Action requise: ${v.requiredAction || '—'} Deadline: ${v.dueDate || '—'}`,
+      source: 'CISA KEV',
+      id: v.cveID,
+    }))
+  } catch(e) { console.warn('CISA KEV failed:', e.message); return [] }
+}
+
+async function fetchAbuseCh() {
+  try {
+    const r = await fetch('https://corsproxy.io/?' + encodeURIComponent('https://threatfox-api.abuse.ch/api/v1/'), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ query: 'get_iocs', days: 1 }),
+      signal: AbortSignal.timeout(10000)
+    })
+    const j = await r.json()
+    if (j.query_status !== 'ok' || !j.data) return []
+    const iocs = j.data.slice(0, 10)
+    return iocs.map(ioc => ({
+      title: `[ThreatFox] ${ioc.ioc_type}: ${ioc.ioc} — ${ioc.malware || 'Malware inconnu'}`,
+      link: `https://threatfox.abuse.ch/ioc/${ioc.id}`,
+      pubDate: new Date(ioc.first_seen_utc || Date.now()).toISOString(),
+      content: `Confiance: ${ioc.confidence_level}%. Tags: ${(ioc.tags||[]).join(', ')}. ${ioc.comment || ''}`,
+      source: 'abuse.ch',
+      id: 'abch-' + ioc.id,
+    }))
+  } catch(e) { console.warn('abuse.ch failed:', e.message); return [] }
+}
+
+// ══════════════════════════════════════════════════════════
+// FETCH ALL + SCORING + DEDUP + DISCORD
+// ══════════════════════════════════════════════════════════
+async function fetchAll() {
+  const btn = document.getElementById('btnFetch')
+  btn.disabled = true; btn.textContent = '◈ Chargement...'
+  document.getElementById('articleList').innerHTML = '<div class="empty"><span style="display:inline-block;animation:spin .8s linear infinite">◈</span>Récupération des sources...</div>'
+
+  const promises = [...FEEDS.map(f => fetchFeed(f)), fetchCISA(), fetchAbuseCh()]
+  const results = await Promise.allSettled(promises)
+  let fresh = []
+  results.forEach(r => { if (r.status === 'fulfilled') fresh.push(...r.value) })
+
+  // Dédup par ID
+  const existingIds = new Set(allArticles.map(a => a.id))
+  const newOnes = fresh.filter(a => a.id && !existingIds.has(a.id))
+
+  // Enrichissement + scoring
+  const enriched = [...fresh].map(a => {
+    const scoring = computeScore(a)
+    return { ...a, ...scoring, level: getLevel(scoring.score), category: getCategory(a) }
+  })
+
+  // Merge avec existants, dédup, trier par score
+  const merged = [...enriched]
+  const mergedIds = new Set(merged.map(a => a.id))
+  allArticles.forEach(a => { if (!mergedIds.has(a.id)) merged.push(a) })
+  merged.sort((a, b) => b.score - a.score)
+  allArticles = merged.slice(0, 200)
+
+  localStorage.setItem('cw_articles', JSON.stringify(allArticles))
+
+  // Notifications Discord pour critiques
+  for (const a of enriched.filter(a => a.level === 'critical' && !discordSent.includes(a.id))) {
+    await sendDiscord(a)
+    discordSent.push(a.id)
+  }
+  localStorage.setItem('cw_discord_sent', JSON.stringify(discordSent.slice(-100)))
+
+  updateStorageInfo()
+  applyFilters()
+  updateKPIs()
+
+  btn.disabled = false; btn.textContent = '◈ Lancer la veille'
+  toast(`✓ ${allArticles.length} articles chargés, ${enriched.filter(a=>a.level==='critical').length} critiques`, false)
+}
+
+// ══════════════════════════════════════════════════════════
+// DISCORD
+// ══════════════════════════════════════════════════════════
+async function sendDiscord(article) {
+  const colors = { critical: 16711680, high: 16744192, medium: 3447003, low: 8421504 }
+  const emojis = { critical: '🔴', high: '🟠', medium: '🔵', low: '⚪' }
+  const payload = {
+    username: 'CyberWatch SOC',
+    avatar_url: 'https://cdn.discordapp.com/embed/avatars/0.png',
+    embeds: [{
+      title: `${emojis[article.level]} ${article.title.slice(0, 200)}`,
+      url: article.link || undefined,
+      description: article.content?.slice(0, 300) + (article.content?.length > 300 ? '...' : ''),
+      color: colors[article.level] || 8421504,
+      fields: [
+        { name: '📊 Score', value: `**${article.score}/10**`, inline: true },
+        { name: '🏦 Pertinence SI', value: `${article.siScore}/10`, inline: true },
+        { name: '📰 Source', value: article.source, inline: true },
+        ...(article.siMatches?.length ? [{ name: '⚠️ Technologies concernées', value: article.siMatches.slice(0,5).join(', ') }] : []),
+      ],
+      footer: { text: `CyberWatch v3 · NeoBank SOC · ${new Date().toLocaleString('fr-FR')}` },
+      timestamp: new Date().toISOString(),
+    }]
+  }
+  try {
+    await fetch(DISCORD_WEBHOOK, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
+    discordCount++
+    localStorage.setItem('cw_discord_count', discordCount)
+    document.getElementById('k6').textContent = discordCount
+  } catch(e) { console.error('Discord failed:', e) }
+}
+
+async function testDiscord() {
+  const payload = {
+    username: 'CyberWatch SOC',
+    embeds: [{
+      title: '🔧 Test CyberWatch v3',
+      description: 'Connexion Discord opérationnelle. Le canal #cyberwatch recevra les alertes critiques automatiquement.',
+      color: 65407,
+      footer: { text: 'NeoBank SOC · ' + new Date().toLocaleString('fr-FR') }
+    }]
+  }
+  try {
+    const r = await fetch(DISCORD_WEBHOOK, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
+    if (r.ok || r.status === 204) {
+      document.getElementById('discordDot').className = 'discord-dot ok'
+      document.getElementById('discordStatus').textContent = 'Discord ✓'
+      toast('✓ Message test envoyé sur #cyberwatch', false)
+    } else {
+      throw new Error('Status ' + r.status)
+    }
+  } catch(e) {
+    document.getElementById('discordDot').className = 'discord-dot err'
+    toast('✗ Discord error: ' + e.message, true)
+  }
+}
+
+// ══════════════════════════════════════════════════════════
+// FILTRES + AFFICHAGE
+// ══════════════════════════════════════════════════════════
+function applyFilters() {
+  const search = document.getElementById('searchInput').value.toLowerCase()
+  let filtered = allArticles.filter(a => {
+    if (filterSrc !== 'all' && a.source !== filterSrc) return false
+    if (filterTopic !== 'all' && a.category !== filterTopic) return false
+    if (a.score < filterScore) return false
+    if (search && !a.title.toLowerCase().includes(search) && !a.content?.toLowerCase().includes(search)) return false
+    return true
+  })
+
+  document.getElementById('veilleCount').textContent = `${filtered.length} alerte${filtered.length>1?'s':''}`
+
+  if (!filtered.length) {
+    document.getElementById('articleList').innerHTML = '<div class="empty"><span>◈</span>Aucune alerte pour ces critères</div>'
+    return
+  }
+
+  const LEVEL_TAG = { critical: ['tag-red','🔴 CRITIQUE'], high: ['tag-amber','🟠 IMPORTANT'], medium: ['tag-blue','🔵 MOYEN'], low: ['tag-gray','⚪ INFO'] }
+  const CAT_TAG = { 'Ransomware & APT':'tag-red','Vulnérabilités CVE':'tag-amber','NIS2 / DORA':'tag-blue','Cloud Security':'tag-green','Active Directory':'tag-orange','Fortinet':'tag-purple','Général':'tag-gray' }
+  const SCORE_CLS = s => s >= 7 ? 'score-crit' : s >= 5 ? 'score-high' : s >= 3 ? 'score-med' : 'score-low'
+
+  document.getElementById('articleList').innerHTML = filtered.map(a => {
+    const [lvlCls, lvlLabel] = LEVEL_TAG[a.level] || LEVEL_TAG.low
+    const catCls = CAT_TAG[a.category] || 'tag-gray'
+    const techStr = a.siMatches?.length ? `<span style="font-size:10px;color:var(--amber);font-family:'IBM Plex Mono',monospace;margin-top:3px;display:block">⚠ ${a.siMatches.slice(0,3).join(', ')}</span>` : ''
+    return `<div class="article">
+      <div class="score-badge ${SCORE_CLS(a.score)}">${a.score}</div>
+      <div class="article-body">
+        <div class="article-meta">
+          <span class="tag ${lvlCls}">${lvlLabel}</span>
+          <span class="tag ${catCls}">${a.category}</span>
+          ${a.source === 'CISA KEV' ? '<span class="tag tag-red">CISA KEV</span>' : ''}
+          ${a.source === 'abuse.ch' ? '<span class="tag tag-orange">ThreatFox</span>' : ''}
+        </div>
+        <div class="article-title"><a href="${a.link}" target="_blank" rel="noopener">${a.title}</a></div>
+        ${a.content ? `<div class="article-snippet">${a.content}</div>` : ''}
+        ${techStr}
+        <div class="article-footer">
+          <span class="article-src">${a.source}</span>
+          <span style="font-size:10px;font-family:'IBM Plex Mono',monospace;color:var(--t3)">SI: ${a.siScore}/10 · CVSS≈${a.cvss}</span>
+          <span class="article-date">${timeAgo(a.pubDate)}</span>
+        </div>
+      </div>
+    </div>`
+  }).join('')
+}
+
+function setSrc(btn) {
+  document.querySelectorAll('[data-src]').forEach(b => b.classList.remove('on'))
+  btn.classList.add('on'); filterSrc = btn.dataset.src; applyFilters()
+}
+function setTopic(btn) {
+  document.querySelectorAll('[data-topic]').forEach(b => b.classList.remove('on'))
+  btn.classList.add('on'); filterTopic = btn.dataset.topic; applyFilters()
+}
+function setScore(btn) {
+  document.querySelectorAll('[data-score]').forEach(b => b.classList.remove('on'))
+  btn.classList.add('on'); filterScore = parseFloat(btn.dataset.score); applyFilters()
+}
+
+// ══════════════════════════════════════════════════════════
+// DASHBOARD KPI
+// ══════════════════════════════════════════════════════════
+function updateKPIs() {
+  const week = Date.now() - 7 * 86400000
+  const recent = allArticles.filter(a => new Date(a.pubDate).getTime() > week)
+  const crits = recent.filter(a => a.level === 'critical')
+  const highs = recent.filter(a => a.level === 'high')
+  const avgScore = allArticles.length ? (allArticles.reduce((s,a) => s+(a.score||0), 0) / allArticles.length).toFixed(1) : '—'
+  const sources = new Set(allArticles.map(a => a.source)).size
+
+  document.getElementById('k1').textContent = crits.length
+  document.getElementById('k1s').textContent = crits.length ? 'Discord notifié' : ''
+  document.getElementById('k2').textContent = highs.length
+  document.getElementById('k3').textContent = allArticles.length
+  document.getElementById('k4').textContent = sources
+  document.getElementById('k5').textContent = avgScore
+  document.getElementById('k6').textContent = discordCount
+
+  // Top technos
+  const techCount = {}
+  allArticles.forEach(a => (a.siMatches||[]).forEach(m => techCount[m] = (techCount[m]||0)+1))
+  const topTech = Object.entries(techCount).sort((a,b)=>b[1]-a[1]).slice(0,6)
+  const maxT = topTech[0]?.[1] || 1
+  document.getElementById('techChart').innerHTML = topTech.map(([k,v]) => `
+    <div class="chart-bar-wrap">
+      <span class="chart-bar-label">${k}</span>
+      <div class="chart-bar-bg"><div class="chart-bar-fill" style="width:${Math.round(v/maxT*100)}%;background:var(--amber)">${v}</div></div>
+    </div>`).join('') || '<span style="color:var(--t3);font-size:12px">Lance la veille pour voir les données</span>'
+
+  // Top sources
+  const srcCount = {}
+  allArticles.forEach(a => srcCount[a.source] = (srcCount[a.source]||0)+1)
+  const topSrc = Object.entries(srcCount).sort((a,b)=>b[1]-a[1]).slice(0,6)
+  const maxS = topSrc[0]?.[1] || 1
+  document.getElementById('srcChart').innerHTML = topSrc.map(([k,v]) => `
+    <div class="chart-bar-wrap">
+      <span class="chart-bar-label">${k}</span>
+      <div class="chart-bar-bg"><div class="chart-bar-fill" style="width:${Math.round(v/maxS*100)}%;background:var(--blue)">${v}</div></div>
+    </div>`).join('') || '<span style="color:var(--t3);font-size:12px">Lance la veille pour voir les données</span>'
+
+  // Dernières critiques
+  const lastCrit = allArticles.filter(a=>a.level==='critical').slice(0,5)
+  document.getElementById('lastCritical').innerHTML = lastCrit.map(a => `
+    <div style="display:flex;align-items:center;gap:10px;padding:8px;background:var(--bg1);border-radius:5px;border:1px solid #ff445520">
+      <div class="score-badge score-crit" style="width:32px;height:32px;font-size:11px">${a.score}</div>
+      <div style="flex:1;min-width:0">
+        <div style="font-size:12px;color:var(--t1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis"><a href="${a.link}" target="_blank" style="color:inherit;text-decoration:none">${a.title}</a></div>
+        <div style="font-size:10px;color:var(--t3);font-family:'IBM Plex Mono',monospace;margin-top:2px">${a.source} · ${timeAgo(a.pubDate)}</div>
+      </div>
+    </div>`).join('') || '<span style="color:var(--t3);font-size:12px;font-family:\'IBM Plex Mono\',monospace">Aucune alerte critique</span>'
+}
+
+// ══════════════════════════════════════════════════════════
+// CLAUDE API
+// ══════════════════════════════════════════════════════════
+async function callClaude(prompt, system, outputEl, onDone) {
+  if (!API_KEY) { outputEl.innerHTML = '<span style="color:var(--amber)">⚠ Configure ta clé API (⚙)</span>'; return }
+  outputEl.innerHTML = '<span class="cursor"></span>'
+  let full = ''
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type':'application/json','x-api-key':API_KEY,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true' },
+      body: JSON.stringify({ model:'claude-haiku-4-5-20251001', max_tokens:1500, stream:true,
+        system: system||'Tu es un analyste SOC senior expert en cybersécurité pour NeoBank, une banque française. Tu réponds en français, de manière concise et opérationnelle.',
+        messages:[{role:'user',content:prompt}] })
+    })
+    const reader = res.body.getReader(); const dec = new TextDecoder()
+    while(true) {
+      const {done,value} = await reader.read(); if(done) break
+      for(const line of dec.decode(value).split('\n')) {
+        if(!line.startsWith('data: ')) continue
+        const d = line.slice(6).trim(); if(d==='[DONE]') break
+        try { const j=JSON.parse(d); if(j.type==='content_block_delta'&&j.delta?.text){ full+=j.delta.text; outputEl.innerHTML=renderMd(full)+'<span class="cursor"></span>' } } catch{}
+      }
+    }
+    outputEl.innerHTML = renderMd(full)
+    if(onDone) onDone(full)
+  } catch(e) { outputEl.innerHTML=`<span style="color:var(--red)">Erreur: ${e.message}</span>` }
+}
+
+function renderMd(t) {
+  return t.replace(/^## (.+)$/gm,'<h2>$1</h2>').replace(/^### (.+)$/gm,'<h3>$1</h3>')
+    .replace(/^\* (.+)$/gm,'<li>$1</li>').replace(/^- (.+)$/gm,'<li>$1</li>')
+    .replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>').replace(/\n\n/g,'<br/>')
+}
+
+async function genAnalysis() {
+  const btn=document.getElementById('btnAnalyse'); btn.disabled=true; btn.textContent='◎ Analyse...'
+  const ctx = allArticles.slice(0,20).map(a=>`[Score:${a.score}][${a.level}][${a.source}] ${a.title}: ${a.content?.slice(0,200)}`).join('\n')
+  const siCtx = 'SI NeoBank: Windows Server, Active Directory, Exchange, Fortinet VPN, Cisco ASA, Citrix, Microsoft 365, Azure AD, Temenos, Sopra Banking. Soumis à NIS2 et DORA.'
+  await callClaude(`Analyse contextuelle NeoBank SOC (mai 2026).\n${siCtx}\n\nActualités récentes (triées par score):\n${ctx||'Aucune donnée — lance la veille d\'abord'}\n\nGénère:\n## Menaces actives impactant NeoBank\n## Vulnérabilités critiques à patcher\n## Actions SOC prioritaires\n## Conformité NIS2/DORA`,null,document.getElementById('analysisOut'),()=>{btn.disabled=false;btn.textContent='◎ Régénérer'})
+  btn.disabled=false; btn.textContent='◎ Régénérer'
+}
+
+function quickQ(btn) { document.getElementById('qInput').value=btn.textContent; askQ() }
+async function askQ() {
+  const q=document.getElementById('qInput').value.trim(); if(!q) return
+  const btn=document.getElementById('btnAsk'); btn.disabled=true; btn.textContent='...'
+  const ctx=allArticles.slice(0,15).map(a=>`[${a.score}] ${a.title} (${a.source})`).join('\n')
+  const si='SI NeoBank: Windows Server, Active Directory, Exchange, Fortinet VPN, Cisco ASA, Citrix, M365, Azure AD, Temenos, Sopra. NIS2+DORA.'
+  await callClaude(`${q}\n\nContexte SI: ${si}\n\nActualités: ${ctx}`,null,document.getElementById('qOut'),()=>{btn.disabled=false;btn.textContent='→'})
+  btn.disabled=false; btn.textContent='→'
+}
+
+async function genDigest() {
+  const btn=document.getElementById('btnDigest'); btn.disabled=true; btn.textContent='◇ Génération...'
+  document.getElementById('btnCopy').style.display='none'
+  if(!allArticles.length) await fetchAll()
+  const ctx=allArticles.slice(0,30).map(a=>`[${a.score}][${a.level}][${a.source}] ${a.title}: ${a.content?.slice(0,250)}`).join('\n')
+  await callClaude(`Génère un digest de veille hebdomadaire SOC pour NeoBank.\nSI: Windows Server, AD, Exchange, Fortinet, Cisco ASA, Citrix, M365, Azure AD, Temenos, Sopra. Soumis NIS2+DORA.\n\n## 🔴 Alertes critiques NeoBank\n## 🟠 Vulnérabilités à patcher\n## 🔵 Threat Intelligence\n## 🟢 NIS2/DORA/Conformité\n## 💡 Actions SOC prioritaires cette semaine\n\nActualités:\n${ctx}`,
+    'Tu es un analyste SOC senior NeoBank. Digest professionnel en français, opérationnel et actionnable.',
+    document.getElementById('digestOut'),
+    ()=>{ document.getElementById('btnCopy').style.display='inline-flex'; btn.disabled=false; btn.textContent='◇ Régénérer' })
+  btn.disabled=false; btn.textContent='◇ Régénérer'
+}
+
+function copyDigest() {
+  navigator.clipboard.writeText(document.getElementById('digestOut').innerText)
+  const b=document.getElementById('btnCopy'); b.textContent='✓ Copié'; setTimeout(()=>b.textContent='◈ Copier',2000)
+}
+
+// ══════════════════════════════════════════════════════════
+// IOCs
+// ══════════════════════════════════════════════════════════
+function loadSample() {
+  document.getElementById('iocInput').value=`CERT-FR CERTFR-2024-ALE-003: Une vulnérabilité critique CVE-2024-21413 (CVSS 9.8) affecte Microsoft Outlook. Le groupe APT29 l'exploite activement depuis update-microsoft[.]ru (185.220.101.45). SHA256: a1b2c3d4e5f6789012345678901234567890abcdef1234567890abcdef123456. C2: c2-server[.]xyz, hxxps://data-collect[.]ru/upload.php`
+  document.getElementById('charCount').textContent=document.getElementById('iocInput').value.length+' car.'
+}
+document.getElementById('iocInput').addEventListener('input',e=>document.getElementById('charCount').textContent=e.target.value.length+' car.')
+
+async function extractIOCs() {
+  const text=document.getElementById('iocInput').value.trim(); if(!text) return
+  if(!API_KEY){alert('Configure ta clé API (⚙)');return}
+  const btn=document.getElementById('btnIOC'); btn.disabled=true; btn.textContent='◉ Extraction...'
+  document.getElementById('iocResults').style.display='none'
+  try {
+    const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':API_KEY,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+      body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:1500,system:'Expert threat intelligence. JSON valide uniquement, sans markdown.',
+        messages:[{role:'user',content:`Extrais les IOCs en JSON: {"ips":[{"value":"","context":""}],"domains":[{"value":"","context":""}],"hashes":[{"value":"","type":"MD5|SHA256","context":""}],"urls":[{"value":"","context":""}],"emails":[{"value":"","context":""}],"cves":[{"value":"","severity":"","context":""}],"threat_actors":[{"name":"","context":""}],"malware":[{"name":"","type":"","context":""}],"summary":"2 phrases"}\n\nTexte: ${text.slice(0,4000)}`}]})})
+    const j=await res.json()
+    const data=JSON.parse((j.content?.[0]?.text||'{}').replace(/```json\n?/g,'').replace(/```/g,'').trim())
+    document.getElementById('iocSummary').innerHTML=`<strong style="color:var(--red)">◉ Analyse</strong><br/>${data.summary||'—'}`
+    const secs=[{k:'ips',l:'IPs',c:'var(--red)',f:'value'},{k:'domains',l:'Domaines',c:'var(--amber)',f:'value'},{k:'hashes',l:'Hashes',c:'var(--purple)',f:'value'},{k:'urls',l:'URLs',c:'var(--blue)',f:'value'},{k:'cves',l:'CVEs',c:'var(--red)',f:'value'},{k:'emails',l:'Emails',c:'var(--green)',f:'value'},{k:'threat_actors',l:'Threat Actors',c:'var(--red)',f:'name'},{k:'malware',l:'Malware',c:'var(--amber)',f:'name'}]
+    document.getElementById('iocGrid').innerHTML=secs.filter(s=>data[s.k]?.length).map(s=>`<div><div style="font-size:10px;font-family:'IBM Plex Mono',monospace;text-transform:uppercase;letter-spacing:.06em;color:${s.c};margin-bottom:6px">${s.l} <span class="tag tag-gray">${data[s.k].length}</span></div>${data[s.k].map(i=>`<div class="ioc-item">${i[s.f]||i.value||i.name}${i.type?` <span style="color:var(--t3)">(${i.type})</span>`:''}${i.severity?` <span style="color:var(--red)">[${i.severity}]</span>`:''}${i.context?`<div class="ioc-ctx">${i.context}</div>`:''}</div>`).join('')}</div>`).join('')
+    document.getElementById('iocResults').style.display='block'
+  } catch(e){alert('Erreur: '+e.message)}
+  btn.disabled=false; btn.textContent='◉ Extraire'
+}
+
+// ══════════════════════════════════════════════════════════
+// UTILS
+// ══════════════════════════════════════════════════════════
+function timeAgo(d) {
+  try { const diff=Math.floor((Date.now()-new Date(d).getTime())/60000); if(diff<1)return'à l\'instant'; if(diff<60)return`il y a ${diff}min`; if(diff<1440)return`il y a ${Math.floor(diff/60)}h`; return`il y a ${Math.floor(diff/1440)}j` } catch{return''}
+}
+
+function toast(msg, isErr=false) {
+  const el=document.createElement('div'); el.className='toast-item'+(isErr?' toast-crit':''); el.textContent=msg
+  document.getElementById('toast').appendChild(el); setTimeout(()=>el.remove(),4000)
+}
+
+function updateStorageInfo() {
+  const bytes=new Blob([localStorage.getItem('cw_articles')||'']).size
+  document.getElementById('storageInfo').textContent=`${allArticles.length} articles · ${(bytes/1024).toFixed(1)} KB`
+}
+
+function clearStorage() {
+  if(!confirm('Vider le cache local ?')) return
+  localStorage.removeItem('cw_articles'); localStorage.removeItem('cw_discord_sent'); localStorage.removeItem('cw_discord_count')
+  allArticles=[]; discordSent=[]; discordCount=0
+  updateStorageInfo(); updateKPIs()
+  toast('Cache vidé')
+}
+
+// ══════════════════════════════════════════════════════════
+// NAV + INIT
+// ══════════════════════════════════════════════════════════
+const PAGE_META = {
+  veille:['VEILLE RSS','Agrégation multi-sources · NeoBank SOC'],
+  dashboard:['DASHBOARD KPI','Métriques direction · 7j / 30j'],
+  analyse:['ANALYSE IA','Analyse contextuelle NeoBank · Claude'],
+  digest:['DIGEST','Synthèse hebdomadaire SOC'],
+  ioc:['EXTRACTION IOCs','IPs · Domaines · Hashes · CVEs · Threat Actors'],
+  settings:['PARAMÈTRES','Configuration CyberWatch v3'],
+}
+function nav(id, btn) {
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'))
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'))
+  document.getElementById('page-'+id).classList.add('active'); btn.classList.add('active')
+  const [t,s]=PAGE_META[id]; document.getElementById('pageTitle').textContent=t; document.getElementById('pageSub').textContent=s
+  if(id==='dashboard') updateKPIs()
+  if(id==='settings') updateStorageInfo()
+}
+
+function saveKey() {
+  const k=document.getElementById('apiKeyInput').value.trim()
+  if(!k.startsWith('sk-ant-')) return alert('Clé invalide')
+  API_KEY=k; localStorage.setItem('cw_api_key',k)
+  document.getElementById('apiModal').style.display='none'
+}
+function skipKey() { document.getElementById('apiModal').style.display='none' }
+function updateKey() {
+  const k=document.getElementById('settingsKey').value.trim()
+  if(!k.startsWith('sk-ant-')) { document.getElementById('keyStatus').style.color='var(--red)'; document.getElementById('keyStatus').textContent='✗ Clé invalide'; return }
+  API_KEY=k; localStorage.setItem('cw_api_key',k)
+  document.getElementById('keyStatus').style.color='var(--green)'; document.getElementById('keyStatus').textContent='✓ Clé enregistrée'
+}
+function clearKey() {
+  API_KEY=''; localStorage.removeItem('cw_api_key')
+  document.getElementById('settingsKey').value=''
+  document.getElementById('keyStatus').style.color='var(--amber)'; document.getElementById('keyStatus').textContent='Clé supprimée'
+}
+
+window.onload = () => {
+  setInterval(()=>document.getElementById('clock').textContent=new Date().toLocaleTimeString('fr-FR'),1000)
+  if(!API_KEY) document.getElementById('apiModal').style.display='flex'
+  if(allArticles.length) { applyFilters(); updateKPIs() }
+  updateStorageInfo()
+  // Test Discord au démarrage
+  setTimeout(async()=>{
+    try {
+      const r=await fetch(DISCORD_WEBHOOK,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:'CyberWatch SOC',content:'⬡ CyberWatch v3 démarré — NeoBank SOC en ligne'})})
+      if(r.ok||r.status===204){document.getElementById('discordDot').className='discord-dot ok';document.getElementById('discordStatus').textContent='Discord ✓'}
+    } catch{}
+  }, 2000)
+}
+</script>
+</body>
+</html>
