@@ -225,6 +225,12 @@ select option{background:var(--bg2)}
           <button class="panel-btn" data-src="Dark Reading" onclick="setSrc(this)">◈ Dark Reading</button>
           <button class="panel-btn" data-src="SANS ISC" onclick="setSrc(this)">◈ SANS ISC</button>
           <button class="panel-btn" data-src="abuse.ch" onclick="setSrc(this)">◉ abuse.ch</button>
+          <button class="panel-btn" data-src="Security Affairs" onclick="setSrc(this)">◈ Security Affairs</button>
+          <button class="panel-btn" data-src="The Record" onclick="setSrc(this)">◈ The Record</button>
+          <button class="panel-btn" data-src="HelpNet Security" onclick="setSrc(this)">◈ HelpNet Security</button>
+          <button class="panel-btn" data-src="Talos Intelligence" onclick="setSrc(this)">◈ Talos Intel</button>
+          <button class="panel-btn" data-src="MSRC Blog" onclick="setSrc(this)">◈ MSRC Blog</button>
+          <button class="panel-btn" data-src="CrowdStrike" onclick="setSrc(this)">◈ CrowdStrike</button>
 
           <div class="panel-lbl">Sujets</div>
           <button class="panel-btn on" data-topic="all" onclick="setTopic(this)">Tous</button>
@@ -239,6 +245,12 @@ select option{background:var(--bg2)}
           <button class="panel-btn on" data-score="0" onclick="setScore(this)">Tous</button>
           <button class="panel-btn" data-score="7" onclick="setScore(this)"><span style="color:var(--red)">●</span> Critique (≥7)</button>
           <button class="panel-btn" data-score="5" onclick="setScore(this)"><span style="color:var(--amber)">●</span> Important (≥5)</button>
+
+          <div class="panel-lbl">Période</div>
+          <button class="panel-btn on" data-days="30" onclick="setDays(this)">30 derniers jours</button>
+          <button class="panel-btn" data-days="7" onclick="setDays(this)">7 derniers jours</button>
+          <button class="panel-btn" data-days="3" onclick="setDays(this)">3 derniers jours</button>
+          <button class="panel-btn" data-days="1" onclick="setDays(this)">24 dernières heures</button>
 
           <div style="margin-top:12px">
             <button class="btn btn-green" style="width:100%;justify-content:center" onclick="fetchAll()" id="btnFetch">◈ Lancer la veille</button>
@@ -396,7 +408,7 @@ let API_KEY = localStorage.getItem('cw_api_key') || ''
 let allArticles = JSON.parse(localStorage.getItem('cw_articles') || '[]')
 let discordSent = JSON.parse(localStorage.getItem('cw_discord_sent') || '[]')
 let discordCount = parseInt(localStorage.getItem('cw_discord_count') || '0')
-let filterSrc = 'all', filterTopic = 'all', filterScore = 0
+let filterSrc = 'all', filterTopic = 'all', filterScore = 0, filterDays = 30
 
 // ══════════════════════════════════════════════════════════
 // SI NEOBANK — inventaire pour scoring pertinence
@@ -506,6 +518,16 @@ const FEEDS = [
   { url: 'https://krebsonsecurity.com/feed/', name: 'Krebs on Security' },
   { url: 'https://threatpost.com/feed/', name: 'Threatpost' },
   { url: 'https://www.schneier.com/feed/atom/', name: 'Schneier on Security' },
+  { url: 'https://securityaffairs.com/feed', name: 'Security Affairs' },
+  { url: 'https://therecord.media/feed', name: 'The Record' },
+  { url: 'https://www.helpnetsecurity.com/feed/', name: 'HelpNet Security' },
+  { url: 'https://www.cyberscoop.com/feed/', name: 'CyberScoop' },
+  { url: 'https://grahamcluley.com/feed/', name: 'Graham Cluley' },
+  { url: 'https://www.rapid7.com/blog/feed/', name: 'Rapid7' },
+  { url: 'https://msrc.microsoft.com/blog/feed', name: 'MSRC Blog' },
+  { url: 'https://www.sentinelone.com/blog/feed/', name: 'SentinelOne' },
+  { url: 'https://blog.talosintelligence.com/rss/', name: 'Talos Intelligence' },
+  { url: 'https://www.crowdstrike.com/blog/feed/', name: 'CrowdStrike' },
 ]
 
 async function fetchFeed(feed) {
@@ -606,7 +628,7 @@ async function fetchAll() {
   results.forEach(r => { if (r.status === 'fulfilled') fresh.push(...r.value) })
 
   // Filtrer articles trop vieux (> 30 jours)
-  const cutoff = Date.now() - 30 * 86400000
+  const cutoff = Date.now() - 30 * 86400000  // on garde 30j en cache, le filtre d'affichage gère la période
   fresh = fresh.filter(a => {
     const d = new Date(a.pubDate).getTime()
     return d > cutoff && d <= Date.now() + 86400000 // pas dans le futur non plus
@@ -708,10 +730,12 @@ async function testDiscord() {
 // ══════════════════════════════════════════════════════════
 function applyFilters() {
   const search = document.getElementById('searchInput').value.toLowerCase()
+  const cutoffFilter = Date.now() - filterDays * 86400000
   let filtered = allArticles.filter(a => {
     if (filterSrc !== 'all' && a.source !== filterSrc) return false
     if (filterTopic !== 'all' && a.category !== filterTopic) return false
     if (a.score < filterScore) return false
+    if (new Date(a.pubDate).getTime() < cutoffFilter) return false
     if (search && !a.title.toLowerCase().includes(search) && !a.content?.toLowerCase().includes(search)) return false
     return true
   })
@@ -756,6 +780,10 @@ function applyFilters() {
 function setSrc(btn) {
   document.querySelectorAll('[data-src]').forEach(b => b.classList.remove('on'))
   btn.classList.add('on'); filterSrc = btn.dataset.src; applyFilters()
+}
+function setDays(btn) {
+  document.querySelectorAll('[data-days]').forEach(b => b.classList.remove('on'))
+  btn.classList.add('on'); filterDays = parseInt(btn.dataset.days); applyFilters()
 }
 function setTopic(btn) {
   document.querySelectorAll('[data-topic]').forEach(b => b.classList.remove('on'))
