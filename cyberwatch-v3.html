@@ -510,7 +510,7 @@ const FEEDS = [
 
 async function fetchFeed(feed) {
   try {
-    const r = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(feed.url)}&count=50`, { signal: AbortSignal.timeout(10000) })
+    const r = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(feed.url)}&count=20`, { signal: AbortSignal.timeout(10000) })
     const j = await r.json()
     if (j.status === 'ok' && j.items?.length) {
       return j.items.map(item => ({
@@ -526,13 +526,16 @@ async function fetchFeed(feed) {
 
   // fallback
   for (const proxy of [
-    `https://corsproxy.io/?${encodeURIComponent(feed.url)}`,
     `https://api.allorigins.win/raw?url=${encodeURIComponent(feed.url)}`,
+    `https://api.allorigins.win/get?url=${encodeURIComponent(feed.url)}`,
+    `https://proxy.cors.sh/${feed.url}`,
   ]) {
     try {
       const r = await fetch(proxy, { signal: AbortSignal.timeout(10000) })
       if (!r.ok) continue
-      const text = await r.text()
+      let text = await r.text()
+      // allorigins /get retourne du JSON avec {contents: "..."}
+      try { const j = JSON.parse(text); if (j.contents) text = j.contents } catch {}
       const doc = new DOMParser().parseFromString(text, 'text/xml')
       const items = doc.querySelectorAll('item, entry')
       if (!items.length) continue
@@ -553,7 +556,7 @@ async function fetchFeed(feed) {
 async function fetchCISA() {
   try {
     // CISA KEV via proxy (JSON public)
-    const r = await fetch('https://corsproxy.io/?' + encodeURIComponent('https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json'), { signal: AbortSignal.timeout(12000) })
+    const r = await fetch('https://api.allorigins.win/raw?url=' + encodeURIComponent('https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json'), { signal: AbortSignal.timeout(12000) })
     const j = await r.json()
     const vulns = (j.vulnerabilities || []).slice(0, 15)
     return vulns.map(v => ({
@@ -569,7 +572,7 @@ async function fetchCISA() {
 
 async function fetchAbuseCh() {
   try {
-    const r = await fetch('https://corsproxy.io/?' + encodeURIComponent('https://threatfox-api.abuse.ch/api/v1/'), {
+    const r = await fetch('https://api.allorigins.win/raw?url=' + encodeURIComponent('https://threatfox-api.abuse.ch/api/v1/'), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ query: 'get_iocs', days: 1 }),
